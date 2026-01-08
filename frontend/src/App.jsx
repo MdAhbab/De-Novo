@@ -20,6 +20,7 @@ import Navbar from './components/common/Navbar';
 import AccessibilityToolbar from './components/common/AccessibilityToolbar';
 import Footer from './components/common/Footer';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import PrivacyMonitor from './components/common/PrivacyMonitor';
 
 
 
@@ -29,13 +30,15 @@ function ProtectedLayout() {
     if (!user) return <Navigate to="/login" />;
 
     return (
-        <div className="min-h-screen flex flex-col bg-background text-text transition-colors duration-300">
-            {/* Navbar removed to avoid duplication with page-specific headers */}
-            {/* <Navbar /> */}
-            <main className="flex-1">
-                <Outlet />
-            </main>
-        </div>
+        <PrivacyMonitor>
+            <div className="min-h-screen flex flex-col bg-background text-text transition-colors duration-300">
+                {/* Navbar removed to avoid duplication with page-specific headers */}
+                {/* <Navbar /> */}
+                <main className="flex-1">
+                    <Outlet />
+                </main>
+            </div>
+        </PrivacyMonitor>
     );
 }
 
