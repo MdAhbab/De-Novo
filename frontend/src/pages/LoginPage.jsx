@@ -1,26 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
-    const { login } = useAuth();
+    const { login, error: authError, clearError, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [localError, setLocalError] = useState('');
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/dashboard');
+        }
+    }, [isAuthenticated, navigate]);
+
+    // Clear error on mount
+    useEffect(() => {
+        clearError?.();
+        setLocalError('');
+    }, []);
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setLocalError('');
         setIsSubmitting(true);
+        
         try {
-            await login(formData.email, formData.password);
-            navigate('/dashboard');
+            const result = await login(formData.email, formData.password);
+            if (result.success) {
+                navigate('/dashboard');
+            } else {
+                setLocalError(result.error || 'Login failed. Please check your credentials.');
+            }
         } catch (error) {
             console.error(error);
-            // In a real app, handle error state here
+            setLocalError('An unexpected error occurred. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
     };
+
+    const displayError = localError || authError;
 
     return (
         <div className="h-screen w-full flex bg-background-light dark:bg-background-dark font-display overflow-hidden">
@@ -101,6 +123,16 @@ const LoginPage = () => {
                     </div>
 
                     <form className="mt-6 space-y-4" onSubmit={handleLogin}>
+                        {/* Error Display */}
+                        {displayError && (
+                            <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl">
+                                <div className="flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-red-500 text-lg">error</span>
+                                    <p className="text-sm text-red-600 dark:text-red-400 font-medium">{displayError}</p>
+                                </div>
+                            </div>
+                        )}
+                        
                         <div className="space-y-4">
                             <div>
                                 <label htmlFor="email" className="block text-xs font-bold text-text-main dark:text-white mb-1.5">Email Address</label>

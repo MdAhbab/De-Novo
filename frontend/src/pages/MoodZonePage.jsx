@@ -1,7 +1,144 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { api } from '../utils/api';
+import { useSpeechToText } from '../hooks/useSpeechToText';
+
+const MOODS = [
+    { id: 'happy', icon: 'sentiment_very_satisfied', label: 'Happy', color: 'green' },
+    { id: 'anxious', icon: 'sentiment_worried', label: 'Anxious', color: 'amber' },
+    { id: 'tired', icon: 'bedtime', label: 'Tired', color: 'purple' },
+    { id: 'angry', icon: 'mood_bad', label: 'Angry', color: 'red' },
+    { id: 'calm', icon: 'self_improvement', label: 'Calm', color: 'blue' },
+    { id: 'sad', icon: 'sentiment_dissatisfied', label: 'Sad', color: 'slate' }
+];
+
+const SOUND_CATEGORIES = ['Nature Sounds', 'Music', 'White Noise', 'Frequencies'];
 
 const MoodZonePage = () => {
+    const [selectedMood, setSelectedMood] = useState(null);
+    const [notes, setNotes] = useState('');
+    const [sounds, setSounds] = useState([]);
+    const [recommendedSounds, setRecommendedSounds] = useState([]);
+    const [currentSound, setCurrentSound] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [activeCategory, setActiveCategory] = useState('Nature Sounds');
+    const [moodHistory, setMoodHistory] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [timer, setTimer] = useState(null);
+    const [timerDuration, setTimerDuration] = useState(5);
+    
+    const { isListening, transcript, startListening, stopListening, clearTranscript } = useSpeechToText();
+
+    // Fetch sounds on mount
+    useEffect(() => {
+        fetchSounds();
+        fetchMoodHistory();
+    }, []);
+
+    // Handle voice transcript
+    useEffect(() => {
+        if (transcript) {
+            setNotes(prev => prev + ' ' + transcript);
+            clearTranscript();
+        }
+    }, [transcript, clearTranscript]);
+
+    // Fetch recommended sounds when mood changes
+    useEffect(() => {
+        if (selectedMood) {
+            fetchRecommendedSounds(selectedMood);
+        }
+    }, [selectedMood]);
+
+    const fetchSounds = async () => {
+        try {
+            const response = await api.mood.getSounds();
+            if (response.success && response.data) {
+                setSounds(response.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch sounds:', err);
+        }
+    };
+
+    const fetchMoodHistory = async () => {
+        try {
+            const response = await api.mood.getMoodHistory(7);
+            if (response.success && response.data) {
+                setMoodHistory(response.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch mood history:', err);
+        }
+    };
+
+    const fetchRecommendedSounds = async (mood) => {
+        try {
+            const response = await api.mood.getRecommendedSounds(mood);
+            if (response.success && response.data) {
+                setRecommendedSounds(response.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch recommended sounds:', err);
+        }
+    };
+
+    const handleMoodSelect = async (moodId) => {
+        setSelectedMood(moodId);
+    };
+
+    const handleLogMood = async () => {
+        if (!selectedMood) return;
+        
+        setLoading(true);
+        try {
+            const response = await api.mood.logMood(selectedMood, notes);
+            if (response.success) {
+                // Clear form and refresh history
+                setNotes('');
+                fetchMoodHistory();
+                // Show success feedback
+                alert('Mood logged successfully!');
+            }
+        } catch (err) {
+            console.error('Failed to log mood:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handlePlaySound = (sound) => {
+        if (currentSound?.id === sound.id && isPlaying) {
+            setIsPlaying(false);
+        } else {
+            setCurrentSound(sound);
+            setIsPlaying(true);
+        }
+    };
+
+    const handleVoiceInput = () => {
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening();
+        }
+    };
+
+    const filteredSounds = sounds.filter(s => 
+        s.category?.toLowerCase().includes(activeCategory.toLowerCase().replace(' ', '_'))
+    );
+
+    const getMoodColor = (color) => {
+        const colors = {
+            green: 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border-green-200 dark:border-green-800 text-green-600 dark:text-green-400',
+            amber: 'bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400',
+            purple: 'bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400',
+            red: 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400',
+            blue: 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400',
+            slate: 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400'
+        };
+        return colors[color] || colors.slate;
+    };
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen flex flex-col">
             {/* Navbar */}
@@ -44,46 +181,55 @@ const MoodZonePage = () => {
                             <p className="text-sm text-slate-500 dark:text-gray-400 mb-6">How are you feeling right now?</p>
                             {/* Mood Grid */}
                             <div className="grid grid-cols-2 gap-3 mb-6">
-                                {/* Mood Item: Happy */}
-                                <button className="group flex flex-col items-center justify-center p-4 rounded-xl bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-transparent hover:border-green-200 dark:hover:border-green-800 transition-all focus:outline-none focus:ring-2 focus:ring-green-500">
-                                    <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-3xl mb-2 icon-filled">sentiment_very_satisfied</span>
-                                    <span className="text-xs font-semibold text-green-700 dark:text-green-300">Happy</span>
-                                </button>
-                                {/* Mood Item: Anxious */}
-                                <button className="group flex flex-col items-center justify-center p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 border border-transparent hover:border-amber-200 dark:hover:border-amber-800 transition-all focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                    <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-3xl mb-2 icon-filled">sentiment_worried</span>
-                                    <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">Anxious</span>
-                                </button>
-                                {/* Mood Item: Tired */}
-                                <button className="group flex flex-col items-center justify-center p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 border border-transparent hover:border-purple-200 dark:hover:border-purple-800 transition-all focus:outline-none focus:ring-2 focus:ring-purple-500">
-                                    <span className="material-symbols-outlined text-purple-600 dark:text-purple-400 text-3xl mb-2 icon-filled">bedtime</span>
-                                    <span className="text-xs font-semibold text-purple-700 dark:text-purple-300">Tired</span>
-                                </button>
-                                {/* Mood Item: Angry */}
-                                <button className="group flex flex-col items-center justify-center p-4 rounded-xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border border-transparent hover:border-red-200 dark:hover:border-red-800 transition-all focus:outline-none focus:ring-2 focus:ring-red-500">
-                                    <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-3xl mb-2 icon-filled">mood_bad</span>
-                                    <span className="text-xs font-semibold text-red-700 dark:text-red-300">Angry</span>
-                                </button>
-                                {/* Mood Item: Calm */}
-                                <button className="group flex flex-col items-center justify-center p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 border border-transparent hover:border-blue-200 dark:hover:border-blue-800 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-gray-900">
-                                    <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-3xl mb-2 icon-filled">self_improvement</span>
-                                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Calm</span>
-                                </button>
-                                {/* Mood Item: Sad */}
-                                <button className="group flex flex-col items-center justify-center p-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent hover:border-slate-300 dark:hover:border-slate-600 transition-all focus:outline-none focus:ring-2 focus:ring-slate-500">
-                                    <span className="material-symbols-outlined text-slate-600 dark:text-slate-400 text-3xl mb-2 icon-filled">sentiment_dissatisfied</span>
-                                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Sad</span>
-                                </button>
+                                {MOODS.map((mood) => (
+                                    <button 
+                                        key={mood.id}
+                                        onClick={() => handleMoodSelect(mood.id)}
+                                        className={`group flex flex-col items-center justify-center p-4 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-${mood.color}-500 ${getMoodColor(mood.color)} ${selectedMood === mood.id ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-gray-900' : 'border border-transparent'}`}
+                                    >
+                                        <span className={`material-symbols-outlined text-3xl mb-2 icon-filled`}>{mood.icon}</span>
+                                        <span className="text-xs font-semibold">{mood.label}</span>
+                                    </button>
+                                ))}
                             </div>
+                            
+                            {/* Notes Input */}
+                            {selectedMood && (
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">Add notes (optional)</label>
+                                    <textarea
+                                        value={notes}
+                                        onChange={(e) => setNotes(e.target.value)}
+                                        placeholder="How are you feeling? What's on your mind?"
+                                        className="w-full p-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                                        rows={3}
+                                    />
+                                </div>
+                            )}
+                            
+                            {/* Log Mood Button */}
+                            {selectedMood && (
+                                <button 
+                                    onClick={handleLogMood}
+                                    disabled={loading}
+                                    className="w-full mb-4 py-3 px-4 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
+                                >
+                                    {loading ? 'Logging...' : 'Log My Mood'}
+                                </button>
+                            )}
+                            
                             {/* Voice Input */}
                             <div className="pt-4 border-t border-slate-100 dark:border-gray-800">
-                                <button className="w-full flex items-center justify-center gap-3 bg-slate-50 dark:bg-gray-800 hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-900 dark:text-white p-4 rounded-xl border border-slate-200 dark:border-gray-700 transition-colors group">
-                                    <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-full group-hover:scale-110 transition-transform">
-                                        <span className="material-symbols-outlined text-primary">mic</span>
+                                <button 
+                                    onClick={handleVoiceInput}
+                                    className={`w-full flex items-center justify-center gap-3 ${isListening ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-slate-50 dark:bg-gray-800 border-slate-200 dark:border-gray-700'} hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-900 dark:text-white p-4 rounded-xl border transition-colors group`}
+                                >
+                                    <div className={`${isListening ? 'bg-red-100 dark:bg-red-900/30 animate-pulse' : 'bg-primary/10 dark:bg-primary/20'} p-2 rounded-full group-hover:scale-110 transition-transform`}>
+                                        <span className={`material-symbols-outlined ${isListening ? 'text-red-500' : 'text-primary'}`}>mic</span>
                                     </div>
                                     <div className="flex flex-col items-start">
-                                        <span className="text-sm font-bold">Voice Input</span>
-                                        <span className="text-xs text-slate-500 dark:text-gray-400">Record your thoughts</span>
+                                        <span className="text-sm font-bold">{isListening ? 'Listening...' : 'Voice Input'}</span>
+                                        <span className="text-xs text-slate-500 dark:text-gray-400">{isListening ? 'Tap to stop' : 'Record your thoughts'}</span>
                                     </div>
                                 </button>
                             </div>
@@ -95,18 +241,19 @@ const MoodZonePage = () => {
                         <div className="bg-surface-light dark:bg-surface-dark rounded-2xl p-1 shadow-sm border border-slate-100 dark:border-gray-800 h-full flex flex-col">
                             {/* Tabs */}
                             <div className="p-4 flex gap-2 overflow-x-auto">
-                                <button className="px-5 py-2.5 rounded-full bg-primary text-white text-sm font-semibold shadow-md shadow-primary/20 transition-transform active:scale-95 whitespace-nowrap">
-                                    Nature Sounds
-                                </button>
-                                <button className="px-5 py-2.5 rounded-full bg-transparent hover:bg-slate-100 dark:hover:bg-gray-800 text-slate-600 dark:text-gray-300 text-sm font-medium transition-colors whitespace-nowrap">
-                                    Music
-                                </button>
-                                <button className="px-5 py-2.5 rounded-full bg-transparent hover:bg-slate-100 dark:hover:bg-gray-800 text-slate-600 dark:text-gray-300 text-sm font-medium transition-colors whitespace-nowrap">
-                                    White Noise
-                                </button>
-                                <button className="px-5 py-2.5 rounded-full bg-transparent hover:bg-slate-100 dark:hover:bg-gray-800 text-slate-600 dark:text-gray-300 text-sm font-medium transition-colors whitespace-nowrap">
-                                    Frequencies
-                                </button>
+                                {SOUND_CATEGORIES.map((category) => (
+                                    <button 
+                                        key={category}
+                                        onClick={() => setActiveCategory(category)}
+                                        className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
+                                            activeCategory === category 
+                                                ? 'bg-primary text-white shadow-md shadow-primary/20' 
+                                                : 'bg-transparent hover:bg-slate-100 dark:hover:bg-gray-800 text-slate-600 dark:text-gray-300'
+                                        }`}
+                                    >
+                                        {category}
+                                    </button>
+                                ))}
                             </div>
                             {/* Visualizer Area */}
                             <div className="relative flex-1 bg-gradient-to-b from-slate-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl m-2 min-h-[300px] flex items-center justify-center overflow-hidden border border-slate-100 dark:border-gray-700">
