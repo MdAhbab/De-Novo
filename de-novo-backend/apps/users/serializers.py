@@ -41,18 +41,25 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     """Serializer for user login."""
     
-    username = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True, write_only=True)
     
     def validate(self, attrs):
-        username = attrs.get('username')
+        email = attrs.get('email')
         password = attrs.get('password')
         
-        user = authenticate(username=username, password=password)
-        
-        if not user:
+        # Find user by email
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
             raise serializers.ValidationError(
-                "Invalid credentials. Please check your username and password."
+                "Invalid credentials. Please check your email and password."
+            )
+        
+        # Check password
+        if not user.check_password(password):
+            raise serializers.ValidationError(
+                "Invalid credentials. Please check your email and password."
             )
         
         if not user.is_active:
@@ -150,12 +157,21 @@ class BlockedUserSerializer(serializers.ModelSerializer):
 class UserSearchSerializer(serializers.ModelSerializer):
     """Serializer for user search results."""
     
+    display_name = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
         fields = [
             'id', 'username', 'first_name', 'last_name',
-            'avatar', 'disability_type', 'is_online'
+            'avatar', 'disability_type', 'is_online', 'display_name'
         ]
+    
+    def get_display_name(self, obj):
+        if obj.first_name and obj.last_name:
+            return f"{obj.first_name} {obj.last_name}"
+        elif obj.first_name:
+            return obj.first_name
+        return obj.username
 
 
 class PublicKeySerializer(serializers.Serializer):

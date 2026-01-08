@@ -162,12 +162,20 @@ export const api = {
     // Chat methods
     chat: {
         getConversations: () => api.get('/chat/conversations/'),
-        createConversation: (participantIds) => api.post('/chat/conversations/', { participant_ids: participantIds }),
+        createConversation: (participantIds, type = 'direct') => api.post('/chat/conversations/create/', { 
+            participant_ids: Array.isArray(participantIds) ? participantIds : [participantIds],
+            conversation_type: type
+        }),
         getConversation: (id) => api.get(`/chat/conversations/${id}/`),
         getMessages: (conversationId, page = 1) => api.get(`/chat/conversations/${conversationId}/messages/?page=${page}`),
-        sendMessage: (conversationId, data) => api.post(`/chat/conversations/${conversationId}/messages/`, data),
-        deleteMessage: (messageId) => api.delete(`/chat/messages/${messageId}/`),
-        markAsRead: (conversationId) => api.post(`/chat/conversations/${conversationId}/read/`)
+        sendMessage: (conversationId, content, messageType = 'text') => api.post('/chat/messages/send/', {
+            conversation_id: conversationId,
+            content: content,
+            message_type: messageType
+        }),
+        deleteMessage: (messageId) => api.delete(`/chat/messages/${messageId}/delete/`),
+        markAsRead: (conversationId) => api.post(`/chat/conversations/${conversationId}/read/`),
+        markMessageAsRead: (messageId) => api.post(`/chat/messages/${messageId}/read/`)
     },
 
     // AI Services
@@ -182,9 +190,11 @@ export const api = {
             ...voiceSettings 
         }),
         
-        speechToText: (audioBase64, language = 'en-US') => api.post('/ai/stt/', { 
-            audio: audioBase64, 
-            language 
+        speechToText: (audioBase64, options = {}) => api.post('/ai/stt/', { 
+            audio_base64: audioBase64, 
+            language_code: options.language_code || 'en-US',
+            encoding: options.encoding || 'WEBM_OPUS',
+            sample_rate: options.sample_rate_hertz || 48000
         }),
         
         getVoices: () => api.get('/ai/tts/voices/'),

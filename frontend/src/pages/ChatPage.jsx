@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { useSpeechToText } from '../hooks/useSpeechToText';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import { useSentimentAnalysis } from '../hooks/useSentimentAnalysis';
+import { useWebcamDetection } from '../hooks/useWebcamDetection';
+import { api } from '../utils/api';
 
 const ChatPage = () => {
     const { user } = useAuth();
@@ -15,17 +17,45 @@ const ChatPage = () => {
         messages, 
         sendMessage, 
         loading,
-        fetchConversations 
+        fetchConversations,
+        startConversation,
+        pollingEnabled,
+        setPollingEnabled,
+        refreshMessages
     } = useChat();
     
     const { isListening, transcript, startListening, stopListening, clearTranscript } = useSpeechToText();
     const { speak, speaking, cancel: cancelSpeech } = useTextToSpeech();
     const { analyze, getSentimentColor, getSentimentEmoji } = useSentimentAnalysis();
+    const { 
+        videoRef, 
+        startCamera, 
+        stopCamera, 
+        captureFrame, 
+        detectFaces, 
+        active: cameraActive,
+        faceCount,
+        privacyAlert,
+        lastDetection
+    } = useWebcamDetection();
     
     const [inputText, setInputText] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [filter, setFilter] = useState('all');
     const [showMobileList, setShowMobileList] = useState(true);
+    const [conversationMood, setConversationMood] = useState(null);
+    const [analyzingMood, setAnalyzingMood] = useState(false);
+    const [showNewChatModal, setShowNewChatModal] = useState(false);
+    const [userSearchQuery, setUserSearchQuery] = useState('');
+    const [userSearchResults, setUserSearchResults] = useState([]);
+    const [searchingUsers, setSearchingUsers] = useState(false);
+    
+    // Visual AI Camera Modal State
+    const [showCameraModal, setShowCameraModal] = useState(false);
+    const [capturedImage, setCapturedImage] = useState(null);
+    const [visualAnalysis, setVisualAnalysis] = useState(null);
+    const [analyzingVisual, setAnalyzingVisual] = useState(false);
+    const localVideoRef = useRef(null);
     
     const messagesEndRef = useRef(null);
     const textareaRef = useRef(null);
@@ -42,6 +72,33 @@ const ChatPage = () => {
             clearTranscript();
         }
     }, [transcript, clearTranscript]);
+
+    // Analyze conversation mood when messages change
+    useEffect(() => {
+        const analyzeConversationMood = async () => {
+            if (messages.length < 2) {
+                setConversationMood(null);
+                return;
+            }
+            
+            setAnalyzingMood(true);
+            try {
+                const messageTexts = messages.slice(-10).map(m => m.text); // Last 10 messages
+                const response = await api.ai.analyzeConversationMood(messageTexts);
+                if (response.success && response.data) {
+                    setConversationMood(response.data);
+                }
+            } catch (err) {
+                console.error('Failed to analyze conversation mood:', err);
+            } finally {
+                setAnalyzingMood(false);
+            }
+        };
+        
+        // Debounce mood analysis
+        const timer = setTimeout(analyzeConversationMood, 1000);
+        return () => clearTimeout(timer);
+    }, [messages]);
 
     // Filter conversations
     const filteredConversations = conversations.filter(conv => {
@@ -103,6 +160,116 @@ const ChatPage = () => {
         setShowMobileList(false);
     };
 
+    // Search for users to start new chat
+    const handleUserSearch = async (query) => {
+        setUserSearchQuery(query);
+        if (query.length < 2) {
+            setUserSearchResults([]);
+            return;
+        }
+        
+        setSearchingUsers(true);
+        try {
+            const response = await api.users.search(query);
+            if (response.success && response.data) {
+                // Filter out current user
+                const filteredUsers = response.data.filter(u => u.id !== user?.id);
+                setUserSearchResults(filteredUsers);
+            }
+        } catch (err) {
+            console.error('User search failed:', err);
+        } finally {
+            setSearchingUsers(false);
+        }
+    };
+
+    // Start a new conversation with a user
+    const handleStartChat = async (targetUser) => {
+        try {
+            const result = await startConversation(targetUser.id);
+            if (result.success) {
+                setShowNewChatModal(false);
+                setUserSearchQuery('');
+                setUserSearchResults([]);
+            }
+        } catch (err) {
+            console.error('Failed to start chat:', err);
+        }
+    };
+
+    // Camera/Visual AI Functions
+    const openCameraModal = async () => {
+        setShowCameraModal(true);
+        setCapturedImage(null);
+        setVisualAnalysis(null);
+        // Start camera after modal opens
+        setTimeout(async () => {
+            if (localVideoRef.current) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { width: 640, height: 480, facingMode: 'user' } 
+                    });
+                    localVideoRef.current.srcObject = stream;
+                } catch (err) {
+                    console.error('Camera access denied:', err);
+                }
+            }
+        }, 100);
+    };
+
+    const closeCameraModal = () => {
+        // Stop camera stream
+        if (localVideoRef.current?.srcObject) {
+            localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
+            localVideoRef.current.srcObject = null;
+        }
+        setShowCameraModal(false);
+        setCapturedImage(null);
+        setVisualAnalysis(null);
+    };
+
+    const capturePhoto = () => {
+        if (!localVideoRef.current) return;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = localVideoRef.current.videoWidth || 640;
+        canvas.height = localVideoRef.current.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(localVideoRef.current, 0, 0);
+        
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+        setCapturedImage(imageData);
+    };
+
+    const analyzeVisual = async () => {
+        if (!capturedImage) return;
+        
+        setAnalyzingVisual(true);
+        try {
+            // Extract base64 data (remove data:image/jpeg;base64, prefix)
+            const base64Data = capturedImage.split(',')[1];
+            
+            // Call face detection API
+            const response = await api.ai.detectFaces(base64Data);
+            
+            if (response.success && response.data) {
+                setVisualAnalysis(response.data);
+            } else {
+                setVisualAnalysis({ error: 'Analysis failed' });
+            }
+        } catch (err) {
+            console.error('Visual analysis failed:', err);
+            setVisualAnalysis({ error: err.message || 'Analysis failed' });
+        } finally {
+            setAnalyzingVisual(false);
+        }
+    };
+
+    const retakePhoto = () => {
+        setCapturedImage(null);
+        setVisualAnalysis(null);
+    };
+
     const formatTime = (timestamp) => {
         if (!timestamp) return '';
         const date = new Date(timestamp);
@@ -156,12 +323,21 @@ const ChatPage = () => {
                             <h1 className="text-2xl font-bold tracking-tight dark:text-white">De-Novo</h1>
                         </Link>
                     </div>
-                    <button 
-                        onClick={() => fetchConversations()}
-                        className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors text-slate-500 dark:text-slate-400"
-                    >
-                        <span className="material-symbols-outlined">refresh</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button 
+                            onClick={() => setShowNewChatModal(true)}
+                            className="size-10 rounded-full bg-primary text-white hover:bg-primary-dark flex items-center justify-center transition-colors shadow-md"
+                            title="New Chat"
+                        >
+                            <span className="material-symbols-outlined">add</span>
+                        </button>
+                        <button 
+                            onClick={() => fetchConversations()}
+                            className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors text-slate-500 dark:text-slate-400"
+                        >
+                            <span className="material-symbols-outlined">refresh</span>
+                        </button>
+                    </div>
                 </div>
                 {/* Search */}
                 <div className="px-6 pb-4">
@@ -302,6 +478,20 @@ const ChatPage = () => {
                                 <div className="flex flex-col">
                                     <div className="flex items-center gap-2">
                                         <h2 className="text-lg font-bold text-slate-900 dark:text-white leading-none">{activeConversation.name}</h2>
+                                        {/* Conversation Mood Indicator */}
+                                        {conversationMood && (
+                                            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                conversationMood.overall_mood === 'positive' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                                conversationMood.overall_mood === 'negative' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                                                'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                            }`}>
+                                                <span className="material-symbols-outlined text-sm">
+                                                    {conversationMood.overall_mood === 'positive' ? 'sentiment_satisfied' :
+                                                     conversationMood.overall_mood === 'negative' ? 'sentiment_dissatisfied' : 'sentiment_neutral'}
+                                                </span>
+                                                <span className="capitalize">{conversationMood.overall_mood || 'neutral'}</span>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-1.5 mt-1">
                                         {activeConversation.isEncrypted && (
@@ -310,10 +500,34 @@ const ChatPage = () => {
                                                 <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">E2E Encrypted</span>
                                             </span>
                                         )}
+                                        {/* Polling Status Indicator */}
+                                        <button 
+                                            onClick={() => setPollingEnabled?.(!pollingEnabled)}
+                                            className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                                                pollingEnabled 
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                                                    : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
+                                            }`}
+                                            title={pollingEnabled ? 'Live updates enabled - Click to disable' : 'Live updates disabled - Click to enable'}
+                                        >
+                                            <span className={`material-symbols-outlined text-[10px] ${pollingEnabled ? 'animate-pulse' : ''}`}>
+                                                {pollingEnabled ? 'sync' : 'sync_disabled'}
+                                            </span>
+                                            <span>{pollingEnabled ? 'Live' : 'Paused'}</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-1">
+                                {/* Manual Refresh Button */}
+                                <button 
+                                    onClick={refreshMessages}
+                                    aria-label="Refresh Messages" 
+                                    className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors"
+                                    title="Refresh messages"
+                                >
+                                    <span className="material-symbols-outlined">refresh</span>
+                                </button>
                                 <button aria-label="Start Voice Call" className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors">
                                     <span className="material-symbols-outlined">call</span>
                                 </button>
@@ -325,6 +539,37 @@ const ChatPage = () => {
                                 </button>
                             </div>
                         </header>
+
+                        {/* Conversation Mood Summary Bar */}
+                        {conversationMood && messages.length >= 2 && (
+                            <div className="px-4 py-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">AI Mood Analysis:</span>
+                                    <div className="flex items-center gap-2">
+                                        {/* Mood Score Bar */}
+                                        <div className="w-24 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                            <div 
+                                                className={`h-full transition-all duration-500 ${
+                                                    conversationMood.score > 0.3 ? 'bg-green-500' :
+                                                    conversationMood.score < -0.3 ? 'bg-red-500' : 'bg-amber-500'
+                                                }`}
+                                                style={{ width: `${Math.abs(conversationMood.score || 0) * 100}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-xs text-slate-600 dark:text-slate-300">
+                                            {conversationMood.score > 0.3 ? '😊 Positive vibes' :
+                                             conversationMood.score < -0.3 ? '😔 Needs attention' : '😐 Neutral'}
+                                        </span>
+                                    </div>
+                                </div>
+                                {analyzingMood && (
+                                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                                        Analyzing...
+                                    </span>
+                                )}
+                            </div>
+                        )}
 
                         {/* Message Stream */}
                         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar" style={{ backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiM5NGEzYjgiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')" }}>
@@ -341,6 +586,15 @@ const ChatPage = () => {
 
                                     {messages.map((msg) => {
                                         const isOutgoing = msg.senderId === user?.id;
+                                        
+                                        // Sentiment-based styling
+                                        const getSentimentBorderClass = (sentiment) => {
+                                            if (!sentiment) return '';
+                                            const sentimentLower = sentiment.toLowerCase();
+                                            if (sentimentLower === 'positive' || sentimentLower === 'happy') return 'border-l-4 border-l-green-400';
+                                            if (sentimentLower === 'negative' || sentimentLower === 'angry' || sentimentLower === 'sad') return 'border-l-4 border-l-red-400';
+                                            return 'border-l-4 border-l-amber-400';
+                                        };
                                         
                                         return (
                                             <div key={msg.id} className={`flex items-end gap-3 group/msg ${isOutgoing ? 'justify-end' : ''}`}>
@@ -359,7 +613,7 @@ const ChatPage = () => {
                                                 )}
                                                 
                                                 <div className={`flex flex-col gap-1 max-w-[85%] md:max-w-[70%] ${isOutgoing ? 'items-end' : ''}`}>
-                                                    <div className={`relative ${isOutgoing ? 'bg-primary text-white rounded-br-none' : 'bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700 rounded-bl-none text-slate-800 dark:text-slate-100'} p-4 rounded-2xl shadow-soft`}>
+                                                    <div className={`relative ${isOutgoing ? 'bg-primary text-white rounded-br-none' : `bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700 rounded-bl-none text-slate-800 dark:text-slate-100 ${getSentimentBorderClass(msg.sentiment)}`} p-4 rounded-2xl shadow-soft`}>
                                                         <p className="text-base leading-relaxed">{msg.text}</p>
                                                         {msg.pending && (
                                                             <span className="absolute -bottom-1 -right-1 text-xs text-slate-400">
@@ -405,6 +659,13 @@ const ChatPage = () => {
                                 <div className="flex gap-2 pb-1">
                                     <button aria-label="Add Attachment" className="size-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-primary dark:hover:text-primary hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center">
                                         <span className="material-symbols-outlined">add_circle</span>
+                                    </button>
+                                    <button 
+                                        onClick={openCameraModal}
+                                        aria-label="Visual AI Camera" 
+                                        className="size-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-primary dark:hover:text-primary hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center"
+                                    >
+                                        <span className="material-symbols-outlined">photo_camera</span>
                                     </button>
                                     <button aria-label="Emoji Picker" className="size-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-primary dark:hover:text-primary hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hidden md:flex items-center justify-center">
                                         <span className="material-symbols-outlined">sentiment_satisfied</span>
@@ -461,6 +722,225 @@ const ChatPage = () => {
                     </>
                 )}
             </main>
+
+            {/* New Chat Modal */}
+            {showNewChatModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                        {/* Modal Header */}
+                        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white">New Chat</h2>
+                            <button 
+                                onClick={() => {
+                                    setShowNewChatModal(false);
+                                    setUserSearchQuery('');
+                                    setUserSearchResults([]);
+                                }}
+                                className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors text-slate-500"
+                            >
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        
+                        {/* Search Input */}
+                        <div className="p-6 pb-4">
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                    <span className="material-symbols-outlined">search</span>
+                                </span>
+                                <input 
+                                    className="w-full h-12 bg-slate-50 dark:bg-slate-800 border-none rounded-xl pl-10 pr-4 text-base focus:ring-2 focus:ring-primary/50 transition-all dark:text-white placeholder:text-slate-400" 
+                                    placeholder="Search users by name or email..." 
+                                    type="text"
+                                    value={userSearchQuery}
+                                    onChange={(e) => handleUserSearch(e.target.value)}
+                                    autoFocus
+                                />
+                            </div>
+                        </div>
+
+                        {/* Search Results */}
+                        <div className="px-6 pb-6 max-h-80 overflow-y-auto">
+                            {searchingUsers ? (
+                                <div className="flex items-center justify-center py-8">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                </div>
+                            ) : userSearchResults.length > 0 ? (
+                                <div className="space-y-2">
+                                    {userSearchResults.map((targetUser) => (
+                                        <button
+                                            key={targetUser.id}
+                                            onClick={() => handleStartChat(targetUser)}
+                                            className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left"
+                                        >
+                                            <div className="relative size-12 shrink-0">
+                                                {targetUser.avatar ? (
+                                                    <img 
+                                                        alt={targetUser.display_name || targetUser.username} 
+                                                        className="w-full h-full object-cover rounded-full" 
+                                                        src={targetUser.avatar} 
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-lg">
+                                                        {(targetUser.display_name || targetUser.username)?.charAt(0)?.toUpperCase() || '?'}
+                                                    </div>
+                                                )}
+                                                <span className={`absolute bottom-0 right-0 size-3 ${targetUser.is_online ? 'bg-green-500' : 'bg-slate-400'} border-2 border-white dark:border-surface-dark rounded-full`}></span>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-bold text-slate-700 dark:text-slate-200 truncate">
+                                                    {targetUser.display_name || targetUser.username}
+                                                </h3>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                                                    @{targetUser.username}
+                                                </p>
+                                            </div>
+                                            <span className="material-symbols-outlined text-primary">chat</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : userSearchQuery.length >= 2 ? (
+                                <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                                    <span className="material-symbols-outlined text-4xl mb-2 block">person_search</span>
+                                    <p className="text-sm font-medium">No users found</p>
+                                    <p className="text-xs">Try a different search term</p>
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                                    <span className="material-symbols-outlined text-4xl mb-2 block">group_add</span>
+                                    <p className="text-sm font-medium">Search for users</p>
+                                    <p className="text-xs">Type at least 2 characters to search</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Camera Modal for Visual AI */}
+            {showCameraModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-primary">photo_camera</span>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Visual AI Analysis</h2>
+                            </div>
+                            <button 
+                                onClick={closeCameraModal}
+                                className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-slate-500">close</span>
+                            </button>
+                        </div>
+
+                        {/* Camera/Image Preview */}
+                        <div className="p-4">
+                            <div className="relative aspect-video bg-slate-900 rounded-xl overflow-hidden">
+                                {capturedImage ? (
+                                    <img 
+                                        src={capturedImage} 
+                                        alt="Captured" 
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <video 
+                                        ref={localVideoRef}
+                                        autoPlay 
+                                        playsInline 
+                                        muted
+                                        className="w-full h-full object-cover"
+                                    />
+                                )}
+
+                                {/* Recording indicator */}
+                                {!capturedImage && (
+                                    <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                                        <span className="size-2 bg-red-500 rounded-full animate-pulse"></span>
+                                        Live
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Analysis Results */}
+                            {visualAnalysis && (
+                                <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                                    <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-primary text-lg">analytics</span>
+                                        Analysis Results
+                                    </h3>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-slate-600 dark:text-slate-400">Faces Detected:</span>
+                                            <span className="font-bold text-slate-800 dark:text-slate-100">{visualAnalysis.face_count || 0}</span>
+                                        </div>
+                                        {visualAnalysis.privacy_alert && (
+                                            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 p-2 rounded-lg">
+                                                <span className="material-symbols-outlined text-lg">warning</span>
+                                                <span className="text-sm font-medium">Privacy Alert: Multiple faces detected!</span>
+                                            </div>
+                                        )}
+                                        {visualAnalysis.message && (
+                                            <p className="text-sm text-slate-600 dark:text-slate-400">{visualAnalysis.message}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Error Message */}
+                            {visualAnalysis?.error && (
+                                <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/30 rounded-xl">
+                                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                                        <span className="material-symbols-outlined">error</span>
+                                        <span className="text-sm font-medium">{visualAnalysis.error}</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 p-4 border-t border-slate-200 dark:border-slate-700">
+                            {!capturedImage ? (
+                                <button
+                                    onClick={capturePhoto}
+                                    className="flex-1 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <span className="material-symbols-outlined">camera</span>
+                                    Capture Photo
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={retakePhoto}
+                                        className="flex-1 py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <span className="material-symbols-outlined">refresh</span>
+                                        Retake
+                                    </button>
+                                    <button
+                                        onClick={analyzeVisual}
+                                        disabled={analyzingVisual}
+                                        className="flex-1 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-dark transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        {analyzingVisual ? (
+                                            <>
+                                                <span className="material-symbols-outlined animate-spin">progress_activity</span>
+                                                Analyzing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="material-symbols-outlined">psychology</span>
+                                                Analyze
+                                            </>
+                                        )}
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

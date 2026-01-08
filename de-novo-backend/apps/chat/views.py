@@ -229,6 +229,43 @@ class MarkAsReadView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
 
+class MarkConversationAsReadView(APIView):
+    """Mark all messages in a conversation as read."""
+    
+    def post(self, request, conversation_id):
+        try:
+            conversation = Conversation.objects.get(
+                id=conversation_id,
+                participants=request.user
+            )
+            
+            # Get all unread messages in this conversation not sent by current user
+            unread_messages = Message.objects.filter(
+                conversation=conversation
+            ).exclude(
+                sender=request.user
+            ).exclude(
+                read_receipts__user=request.user
+            )
+            
+            # Create read receipts for all unread messages
+            receipts = [
+                MessageReadReceipt(message=msg, user=request.user)
+                for msg in unread_messages
+            ]
+            MessageReadReceipt.objects.bulk_create(receipts, ignore_conflicts=True)
+            
+            return Response({
+                'success': True,
+                'message': f'{len(receipts)} messages marked as read'
+            })
+        except Conversation.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': {'message': 'Conversation not found'}
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
 class DeleteMessageView(APIView):
     """Delete a message (soft delete)."""
     

@@ -35,9 +35,9 @@ const LandingPage = () => {
                         <div className="flex items-center gap-4">
                             <Link
                                 to="/login"
-                                className="hidden sm:block text-base font-bold text-primary hover:underline underline-offset-4 decoration-2"
+                                className="flex items-center justify-center h-12 px-6 rounded-lg border-2 border-primary text-primary hover:bg-primary hover:text-white text-base font-bold transition-all"
                             >
-                                Sign In
+                                Login
                             </Link>
                             <Link
                                 to="/register"

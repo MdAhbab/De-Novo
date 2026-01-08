@@ -53,33 +53,59 @@ const MoodZonePage = () => {
     const fetchSounds = async () => {
         try {
             const response = await api.mood.getSounds();
-            if (response.success && response.data) {
+            // Handle various response formats
+            if (Array.isArray(response)) {
+                setSounds(response);
+            } else if (response?.data && Array.isArray(response.data)) {
                 setSounds(response.data);
+            } else if (response?.results && Array.isArray(response.results)) {
+                setSounds(response.results);
+            } else {
+                console.log('Sounds response:', response);
+                setSounds([]);
             }
         } catch (err) {
             console.error('Failed to fetch sounds:', err);
+            setSounds([]);
         }
     };
 
     const fetchMoodHistory = async () => {
         try {
             const response = await api.mood.getMoodHistory(7);
-            if (response.success && response.data) {
+            // Handle various response formats
+            if (Array.isArray(response)) {
+                setMoodHistory(response);
+            } else if (response?.data && Array.isArray(response.data)) {
                 setMoodHistory(response.data);
+            } else if (response?.results && Array.isArray(response.results)) {
+                setMoodHistory(response.results);
+            } else {
+                console.log('Mood history response:', response);
+                setMoodHistory([]);
             }
         } catch (err) {
             console.error('Failed to fetch mood history:', err);
+            setMoodHistory([]);
         }
     };
 
     const fetchRecommendedSounds = async (mood) => {
         try {
             const response = await api.mood.getRecommendedSounds(mood);
-            if (response.success && response.data) {
+            // Handle various response formats
+            if (Array.isArray(response)) {
+                setRecommendedSounds(response);
+            } else if (response?.data && Array.isArray(response.data)) {
                 setRecommendedSounds(response.data);
+            } else if (response?.results && Array.isArray(response.results)) {
+                setRecommendedSounds(response.results);
+            } else {
+                setRecommendedSounds([]);
             }
         } catch (err) {
             console.error('Failed to fetch recommended sounds:', err);
+            setRecommendedSounds([]);
         }
     };
 
@@ -93,15 +119,19 @@ const MoodZonePage = () => {
         setLoading(true);
         try {
             const response = await api.mood.logMood(selectedMood, notes);
-            if (response.success) {
+            // Handle various response formats - success if we get any valid response without error
+            if (response && !response.error) {
                 // Clear form and refresh history
                 setNotes('');
                 fetchMoodHistory();
                 // Show success feedback
                 alert('Mood logged successfully!');
+            } else {
+                alert(response?.error?.message || 'Failed to log mood');
             }
         } catch (err) {
             console.error('Failed to log mood:', err);
+            alert('Failed to log mood. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -124,9 +154,9 @@ const MoodZonePage = () => {
         }
     };
 
-    const filteredSounds = sounds.filter(s => 
+    const filteredSounds = Array.isArray(sounds) ? sounds.filter(s => 
         s.category?.toLowerCase().includes(activeCategory.toLowerCase().replace(' ', '_'))
-    );
+    ) : [];
 
     const getMoodColor = (color) => {
         const colors = {

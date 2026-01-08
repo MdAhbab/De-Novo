@@ -1,9 +1,15 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const DashboardPage = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
     // Dynamic Date Formatting
     const today = new Date();
@@ -68,6 +74,14 @@ const DashboardPage = () => {
                                 <span className="text-sm font-bold text-gray-700 dark:text-gray-200 hidden sm:block group-hover:text-primary">{user?.name || 'User'}</span>
                                 <span className="material-symbols-outlined text-gray-400 text-lg">expand_more</span>
                             </Link>
+                            <button
+                                onClick={handleLogout}
+                                aria-label="Logout"
+                                className="flex items-center gap-2 p-2 px-4 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 focus:bg-red-50 dark:focus:bg-red-900/20 transition-colors font-bold"
+                            >
+                                <span className="material-symbols-outlined text-xl">logout</span>
+                                <span className="hidden sm:block">Logout</span>
+                            </button>
                         </div>
                     </div>
                 </div>

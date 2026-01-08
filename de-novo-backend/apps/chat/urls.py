@@ -11,6 +11,7 @@ urlpatterns = [
     path('conversations/create/', views.CreateConversationView.as_view(), name='create_conversation'),
     path('conversations/<uuid:conversation_id>/', views.ConversationDetailView.as_view(), name='conversation_detail'),
     path('conversations/<uuid:conversation_id>/messages/', views.MessageListView.as_view(), name='messages'),
+    path('conversations/<uuid:conversation_id>/read/', views.MarkConversationAsReadView.as_view(), name='mark_conversation_read'),
     
     # Messages
     path('messages/send/', views.SendMessageView.as_view(), name='send_message'),

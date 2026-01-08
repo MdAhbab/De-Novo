@@ -1,8 +1,12 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { api, isAuthenticated } from '../utils/api';
 import { useAuth } from './AuthContext';
 
 const ChatContext = createContext(null);
+
+// Polling interval for messages (in milliseconds)
+const MESSAGE_POLL_INTERVAL = 3000; // 3 seconds
+const CONVERSATION_POLL_INTERVAL = 10000; // 10 seconds
 
 export const ChatProvider = ({ children }) => {
     const { user } = useAuth();
@@ -11,6 +15,11 @@ export const ChatProvider = ({ children }) => {
     const [messages, setMessages] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [pollingEnabled, setPollingEnabled] = useState(true);
+    
+    // Refs for polling intervals
+    const messagePollingRef = useRef(null);
+    const conversationPollingRef = useRef(null);
 
     // Fetch conversations from backend
     const fetchConversations = useCallback(async () => {
@@ -48,18 +57,20 @@ export const ChatProvider = ({ children }) => {
         
         try {
             const response = await api.chat.getMessages(conversationId);
-            if (response.success && response.data) {
+            // Handle both paginated response (results array) and direct array response
+            const messagesData = response.results || response.data || response;
+            if (messagesData && Array.isArray(messagesData)) {
                 // Transform backend messages to frontend format
-                const formattedMessages = response.data.map(msg => ({
+                const formattedMessages = messagesData.map(msg => ({
                     id: msg.id,
-                    senderId: msg.sender?.id || msg.sender,
-                    senderName: msg.sender?.display_name || msg.sender?.username,
+                    senderId: msg.sender,
+                    senderName: msg.sender_username,
                     text: msg.content,
                     type: msg.message_type || 'text',
                     timestamp: msg.created_at,
                     sentiment: msg.sentiment,
                     isRead: msg.is_read
-                }));
+                })).reverse(); // Reverse to show oldest first
                 setMessages(prev => ({
                     ...prev,
                     [conversationId]: formattedMessages
@@ -81,14 +92,47 @@ export const ChatProvider = ({ children }) => {
         }
     }, [user, fetchConversations]);
 
-    // Load messages when active conversation changes
+    // Poll conversations periodically
+    useEffect(() => {
+        if (!user || !pollingEnabled) return;
+        
+        conversationPollingRef.current = setInterval(() => {
+            if (isAuthenticated()) {
+                fetchConversations();
+            }
+        }, CONVERSATION_POLL_INTERVAL);
+        
+        return () => {
+            if (conversationPollingRef.current) {
+                clearInterval(conversationPollingRef.current);
+            }
+        };
+    }, [user, pollingEnabled, fetchConversations]);
+
+    // Load messages when active conversation changes + poll for new messages
     useEffect(() => {
         if (activeConversation?.id) {
+            // Initial fetch
             fetchMessages(activeConversation.id);
             // Mark as read
             api.chat.markAsRead(activeConversation.id).catch(console.error);
+            
+            // Set up polling for new messages
+            if (pollingEnabled) {
+                messagePollingRef.current = setInterval(() => {
+                    if (isAuthenticated() && activeConversation?.id) {
+                        fetchMessages(activeConversation.id);
+                    }
+                }, MESSAGE_POLL_INTERVAL);
+            }
         }
-    }, [activeConversation?.id, fetchMessages]);
+        
+        return () => {
+            if (messagePollingRef.current) {
+                clearInterval(messagePollingRef.current);
+            }
+        };
+    }, [activeConversation?.id, fetchMessages, pollingEnabled]);
 
     // Send a message
     const sendMessage = async (text, type = 'text') => {
@@ -116,12 +160,13 @@ export const ChatProvider = ({ children }) => {
             
             if (response.success && response.data) {
                 // Replace temp message with real one
+                // Note: sender is returned as user ID, not nested object
                 setMessages(prev => ({
                     ...prev,
                     [activeConversation.id]: prev[activeConversation.id].map(msg => 
                         msg.id === tempId ? {
                             id: response.data.id,
-                            senderId: response.data.sender?.id || user?.id,
+                            senderId: response.data.sender,
                             text: response.data.content,
                             type: response.data.message_type || 'text',
                             timestamp: response.data.created_at,
@@ -200,7 +245,11 @@ export const ChatProvider = ({ children }) => {
             getComposedMessage,
             loading,
             error,
-            clearError: () => setError(null)
+            clearError: () => setError(null),
+            // Polling controls
+            pollingEnabled,
+            setPollingEnabled,
+            refreshMessages: () => activeConversation?.id && fetchMessages(activeConversation.id)
         }}>
             {children}
         </ChatContext.Provider>

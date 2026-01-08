@@ -79,9 +79,9 @@ export const useTextToSpeech = () => {
                 pitch: pitch
             });
 
-            if (response.success && response.data?.audio_base64) {
+            if (response.success && (response.data?.audio_content || response.data?.audio_base64)) {
                 // Play the audio
-                const audioContent = response.data.audio_base64;
+                const audioContent = response.data.audio_content || response.data.audio_base64;
                 const audioBlob = base64ToBlob(audioContent, 'audio/mp3');
                 const audioUrl = URL.createObjectURL(audioBlob);
 
