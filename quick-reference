@@ -1,0 +1,303 @@
+# ⚡ HACKATHON QUICK REFERENCE - Print This!
+
+## HOUR-BY-HOUR CHECKLIST (48 Hours)
+
+### **HOURS 0-2: SETUP** ✅
+```
+[ ] Create venv + install Django, DRF, CORS
+[ ] Create React Vite project  
+[ ] Initialize Django project & apps (users, chat)
+[ ] Push to GitHub
+[ ] Create Railway + Vercel accounts
+```
+
+### **HOURS 2-6: BACKEND AUTH** ✅
+```
+[ ] CustomUser model with accessibility fields
+[ ] JWT authentication endpoints
+[ ] Chat Message model
+[ ] Message API endpoints (create, list, get with user)
+[ ] Test with Postman (3 test users)
+[ ] Create test data
+```
+
+### **HOURS 6-10: REACT SETUP + LOGIN** ✅
+```
+[ ] React Router setup (Login, Register, Chat routes)
+[ ] Zustand auth store
+[ ] Login page (connect to backend)
+[ ] Register page (connect to backend)
+[ ] Protected routes
+[ ] Test login/register flow (end-to-end)
+```
+
+### **HOURS 10-14: CHAT UI** ✅
+```
+[ ] Conversations list
+[ ] Message display area
+[ ] Message input + send
+[ ] Real-time refresh (polling every 2s)
+[ ] Text-to-speech button (use Web Speech API)
+[ ] Speech-to-text button (use Web Speech API)
+[ ] Accessibility dropdown (normal, large_text, high_contrast, colorblind)
+[ ] Test with 2 browser windows open
+```
+
+### **HOURS 14-16: POLISH + README** ✅
+```
+[ ] Fix UI bugs
+[ ] Update CORS for deployed URLs
+[ ] Write README
+[ ] Create requirements.txt
+[ ] Add default test credentials to README
+[ ] Clean up Git history (no node_modules, venv)
+```
+
+### **HOURS 16-18: DEPLOY** ✅
+```
+BACKEND:
+[ ] Push to GitHub
+[ ] Deploy to Railway (or Render)
+[ ] Set environment variables
+[ ] Test API from production URL
+[ ] Update frontend .env to use production API
+
+FRONTEND:
+[ ] Push to GitHub
+[ ] Deploy to Vercel
+[ ] Add environment variable VITE_API_URL
+[ ] Test on production URL
+[ ] Update Django CORS settings
+```
+
+### **HOURS 18-22: TESTING** ✅
+```
+[ ] Test end-to-end on production
+[ ] Create multiple test users
+[ ] Test all accessibility modes
+[ ] Test voice input/output
+[ ] Record 2-min demo video
+[ ] Fix any bugs
+[ ] Create presentation slides
+```
+
+### **HOURS 22-24: FINAL PREP** ✅
+```
+[ ] Practice 2-minute pitch 5 times
+[ ] Prepare presentation
+[ ] Double-check deployment works
+[ ] Have offline demo ready (just in case)
+[ ] Sleep 4-6 hours before presentation!
+```
+
+---
+
+## 🔑 KEY API ENDPOINTS (Bookmark These!)
+
+### Auth
+```
+POST /api/auth/register/
+{
+  "username": "john",
+  "email": "john@example.com",
+  "password": "pass123",
+  "accessibility_preference": "normal"
+}
+
+POST /api/auth/login/
+{
+  "username": "john",
+  "password": "pass123"
+}
+Response: { access, refresh, user }
+```
+
+### Messages
+```
+GET /api/messages/conversations/
+Authorization: Bearer <token>
+
+GET /api/messages/with_user/?user_id=2
+Authorization: Bearer <token>
+
+POST /api/messages/
+Authorization: Bearer <token>
+{
+  "sender_id": 1,
+  "receiver_id": 2,
+  "content": "Hello!"
+}
+```
+
+---
+
+## 🎨 ACCESSIBILITY CSS QUICK COPY
+
+```css
+/* Normal Mode */
+.theme-normal {
+  background: #fff;
+  color: #000;
+  font-size: 14px;
+}
+
+/* Large Text */
+.theme-large-text {
+  background: #fff;
+  color: #000;
+  font-size: 20px;
+}
+
+/* High Contrast */
+.theme-high-contrast {
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+}
+
+/* Color-blind Friendly */
+.theme-colorblind {
+  background: #fef5e7;
+  color: #1a3a3a;
+  font-size: 14px;
+}
+```
+
+---
+
+## 🚀 DEPLOYMENT QUICK LINKS
+
+**Railway:** https://railway.app
+- Connect GitHub
+- Select backend folder
+- Set PORT env variable
+- Deploy (auto redeploy on push)
+
+**Vercel:** https://vercel.com
+- Connect GitHub
+- Select frontend folder
+- Set VITE_API_URL env variable
+- Deploy (auto redeploy on push)
+
+---
+
+## 🎙️ VOICE API (Copy-Paste Ready)
+
+```javascript
+// Text to Speech
+const speak = (text) => {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 0.9;
+  window.speechSynthesis.speak(utterance);
+};
+
+// Speech to Text
+const startRecognition = (callback) => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.onresult = (event) => {
+    const transcript = Array.from(event.results)
+      .map(result => result[0].transcript)
+      .join('');
+    callback(transcript);
+  };
+  recognition.start();
+};
+```
+
+---
+
+## 🐛 COMMON ERRORS & FIXES
+
+### Error: "No module named 'rest_framework'"
+```bash
+pip install djangorestframework
+```
+
+### Error: CORS error in browser console
+**Fix in Django `settings.py`:**
+```python
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://your-frontend-url.vercel.app",
+]
+```
+
+### Error: "User matching query does not exist"
+→ Make sure you're creating users first with `/register/` endpoint
+
+### Error: Messages not updating in real-time
+→ That's expected (polling solution). Production would use WebSockets, but polling works for hackathon!
+
+### Error: "name 'Q' is not defined" in chat/views.py
+**Add this import:**
+```python
+from django.db.models import Q
+```
+
+### Error: "Failed to send message"
+→ Check that `sender_id` and `receiver_id` match actual users in database
+
+---
+
+## 📱 BROWSER CONSOLE DEBUGGING
+
+```javascript
+// Check if token exists
+localStorage.getItem('access_token')
+
+// Clear all data
+localStorage.clear()
+
+// Test voice API
+new SpeechSynthesisUtterance("Hello world")
+
+// Check API response
+fetch('http://localhost:8000/api/messages/', {
+  headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
+}).then(r => r.json()).then(console.log)
+```
+
+---
+
+## ✨ FINAL PRESENTATION TIPS
+
+**DO:**
+- ✅ Show a real demo (not slides)
+- ✅ Have 2-3 backup features if one fails
+- ✅ Show the problem first (1 minute)
+- ✅ Show the solution second (1 minute)
+- ✅ Make eye contact with judges
+- ✅ Speak clearly about accessibility benefits
+
+**DON'T:**
+- ❌ Read code to judges
+- ❌ Show 100% perfect UI (focus on functionality)
+- ❌ Talk about features you didn't build
+- ❌ Apologize for what you didn't do
+- ❌ Use jargon without explaining
+- ❌ Demo with unstable internet
+
+---
+
+## 🏆 JUDGE IMPRESSION CHECKLIST
+
+Judges care about (in order):
+1. **Problem-solution fit** - Do you solve a real problem?
+2. **Working demo** - Does it actually work?
+3. **Impact** - How many people benefit?
+4. **Technical implementation** - Is it well-built?
+5. **Presentation** - Can you explain it clearly?
+
+---
+
+## 💪 YOU'VE GOT THIS!
+
+- Set phone alarms for each phase milestone
+- Take 15-min breaks every 2 hours
+- Stay hydrated
+- Keep the roadmap open on second monitor
+- When stuck > search + ask in Discord/Slack
+- It's ok if some features aren't perfect - MVP wins!
+
+**Good luck! 🚀**
