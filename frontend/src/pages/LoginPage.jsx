@@ -1,7 +1,26 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            await login(formData.email, formData.password);
+            navigate('/dashboard');
+        } catch (error) {
+            console.error(error);
+            // In a real app, handle error state here
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
     return (
         <div className="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden font-display text-[#0c1b1d] dark:text-white">
             {/* TopNavBar Component (Adapted) */}
@@ -76,7 +95,7 @@ const LoginPage = () => {
                                 <div className="flex-grow border-t border-[#e6f3f4] dark:border-gray-700"></div>
                             </div>
 
-                            <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+                            <form className="flex flex-col gap-5" onSubmit={handleLogin}>
                                 {/* TextField Component 1 (Email) */}
                                 <label className="flex flex-col w-full">
                                     <p className="text-[#0c1b1d] dark:text-white text-base font-bold leading-normal pb-2">Email Address</p>
@@ -84,7 +103,9 @@ const LoginPage = () => {
                                         <input
                                             className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0c1b1d] dark:text-white border-2 border-[#cde6ea] dark:border-gray-700 bg-[#f8fbfc] dark:bg-gray-800 focus:border-[#008c9e] focus:ring-0 h-16 placeholder:text-[#4596a1] p-[15px] pl-[50px] text-lg font-normal leading-normal transition-colors"
                                             placeholder="name@example.com"
-                                            defaultValue=""
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            required
                                         />
                                         <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#4596a1]">mail</span>
                                     </div>
@@ -101,17 +122,14 @@ const LoginPage = () => {
                                             className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0c1b1d] dark:text-white border-2 border-[#cde6ea] dark:border-gray-700 bg-[#f8fbfc] dark:bg-gray-800 focus:border-[#008c9e] focus:ring-0 h-16 placeholder:text-[#4596a1] p-[15px] pl-[50px] text-lg font-normal leading-normal transition-colors"
                                             placeholder="Enter your password"
                                             type="password"
-                                            defaultValue=""
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            required
                                         />
                                         <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#4596a1]">lock</span>
                                         <button className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4596a1] hover:text-[#008c9e] p-1 rounded-full hover:bg-[#e6f3f4] dark:hover:bg-gray-700 transition-colors" type="button">
                                             <span className="material-symbols-outlined">visibility</span>
                                         </button>
-                                    </div>
-                                    {/* Error Feedback Region (Accessibility requirement) */}
-                                    <div aria-live="polite" className="mt-2 hidden group-focus-within/password:flex items-center gap-2 text-amber-600 dark:text-amber-500 animate-pulse" role="alert">
-                                        <span className="material-symbols-outlined text-sm">info</span>
-                                        <span className="text-sm font-semibold">Caps lock is on</span>
                                     </div>
                                 </label>
 
@@ -127,10 +145,10 @@ const LoginPage = () => {
                                 </label>
 
                                 {/* Primary Action */}
-                                <Link to="/dashboard" className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 bg-[#008c9e] hover:bg-[#007a8a] text-white gap-2 text-lg font-bold leading-normal tracking-[0.015em] px-5 shadow-lg shadow-[#008c9e]/20 transition-all active:scale-[0.99] text-center">
-                                    <span className="truncate">Sign In</span>
-                                    <span className="material-symbols-outlined" data-icon="ArrowRight" data-size="24px">arrow_forward</span>
-                                </Link>
+                                <button type="submit" disabled={isSubmitting} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 bg-[#008c9e] hover:bg-[#007a8a] text-white gap-2 text-lg font-bold leading-normal tracking-[0.015em] px-5 shadow-lg shadow-[#008c9e]/20 transition-all active:scale-[0.99] text-center disabled:opacity-70 disabled:cursor-not-allowed">
+                                    <span className="truncate">{isSubmitting ? 'Signing In...' : 'Sign In'}</span>
+                                    {!isSubmitting && <span className="material-symbols-outlined" data-icon="ArrowRight" data-size="24px">arrow_forward</span>}
+                                </button>
                             </form>
 
                             {/* Social Login */}
