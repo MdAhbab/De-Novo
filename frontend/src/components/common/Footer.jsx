@@ -9,7 +9,7 @@ export default function Footer() {
                     <div className="col-span-2 md:col-span-1">
                         <div className="flex items-center gap-2 mb-4">
                             <span className="material-symbols-outlined text-3xl text-primary">accessibility_new</span>
-                            <span className="text-xl font-bold text-text-main dark:text-white">De-Novo</span>
+                            <span className="text-xl font-bold text-text-main dark:text-white">EchoReach</span>
                         </div>
                         <p className="text-sm text-text-muted dark:text-gray-400 leading-relaxed">
                             Building a world where communication has no physical limits.
@@ -41,7 +41,7 @@ export default function Footer() {
                     </div>
                 </div>
                 <div className="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-text-muted dark:text-gray-500">© 2026 De-Novo Inc. All rights reserved.</p>
+                    <p className="text-sm text-text-muted dark:text-gray-500">© 2026 EchoReach Inc. All rights reserved.</p>
                     <div className="flex gap-6">
                         <Link className="text-text-muted dark:text-gray-500 hover:text-primary transition-colors" to="#">
                             <span className="sr-only">Twitter</span>

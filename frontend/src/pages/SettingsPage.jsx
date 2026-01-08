@@ -17,7 +17,7 @@ const SettingsPage = () => {
                             <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
                                 <span className="material-symbols-outlined text-primary text-2xl">grid_view</span>
                             </div>
-                            <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">De-Novo</h2>
+                            <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">EchoReach</h2>
                         </Link>
                     </div>
                     {/* User Profile Snippet */}
@@ -68,7 +68,7 @@ const SettingsPage = () => {
                     <header className="md:hidden flex items-center justify-between p-4 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-800">
                         <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-primary text-2xl">grid_view</span>
-                            <span className="font-bold text-lg">De-Novo</span>
+                            <span className="font-bold text-lg">EchoReach</span>
                         </div>
                         <button className="p-2 text-gray-600 dark:text-gray-400">
                             <span className="material-symbols-outlined">menu</span>
@@ -111,7 +111,7 @@ const SettingsPage = () => {
                                         <div className="space-y-1">
                                             <h3 className="text-white text-xl font-bold">End-to-End Encryption is Active</h3>
                                             <p className="text-white/90 text-sm md:text-base max-w-lg">
-                                                Your messages and calls are secured. Only you and the recipient can read or listen to them. De-Novo cannot intercept your communications.
+                                                Your messages and calls are secured. Only you and the recipient can read or listen to them. EchoReach cannot intercept your communications.
                                             </p>
                                         </div>
                                     </div>
@@ -270,7 +270,7 @@ const SettingsPage = () => {
                                     <span className="material-symbols-outlined text-lg">support_agent</span>
                                     Contact Accessibility Support
                                 </button>
-                                <p className="text-xs text-gray-400 dark:text-gray-600 mt-2">De-Novo Version 2.4.1 (Build 8821)</p>
+                                <p className="text-xs text-gray-400 dark:text-gray-600 mt-2">EchoReach Version 2.4.1 (Build 8821)</p>
                             </div>
                         </div>
                     </div>

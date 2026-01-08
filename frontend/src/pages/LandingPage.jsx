@@ -21,7 +21,7 @@ const LandingPage = () => {
                             <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary">
                                 <span className="material-symbols-outlined text-3xl">accessibility_new</span>
                             </div>
-                            <span className="text-2xl font-extrabold tracking-tight text-text-main dark:text-white">De-Novo</span>
+                            <span className="text-2xl font-extrabold tracking-tight text-text-main dark:text-white">EchoReach</span>
                         </div>
 
                         {/* Desktop Nav */}
@@ -41,7 +41,7 @@ const LandingPage = () => {
                             </Link>
                             <Link
                                 to="/register"
-                                aria-label="Get Started with De-Novo"
+                                aria-label="Get Started with EchoReach"
                                 className="flex items-center justify-center h-12 px-6 rounded-lg bg-primary hover:bg-primary-dark text-white text-base font-bold shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
                             >
                                 Get Started
@@ -76,9 +76,9 @@ const LandingPage = () => {
                                     {/* Voice Announcement Simulation via title/aria */}
                                     <Link
                                         to="/register"
-                                        aria-label="Join De-Novo, press to sign up"
+                                        aria-label="Join EchoReach, press to sign up"
                                         className="group relative flex items-center justify-center h-14 px-8 rounded-lg bg-primary hover:bg-primary-dark text-white text-lg font-bold shadow-xl shadow-primary/25 transition-all hover:scale-105"
-                                        title="Voice Announcement: Join De-Novo"
+                                        title="Voice Announcement: Join EchoReach"
                                     >
                                         <span className="material-symbols-outlined mr-2 group-hover:animate-pulse">record_voice_over</span>
                                         Get Started
@@ -289,7 +289,7 @@ const LandingPage = () => {
                         <div className="col-span-2 md:col-span-1">
                             <div className="flex items-center gap-2 mb-4">
                                 <span className="material-symbols-outlined text-3xl text-primary">accessibility_new</span>
-                                <span className="text-xl font-bold text-text-main dark:text-white">De-Novo</span>
+                                <span className="text-xl font-bold text-text-main dark:text-white">EchoReach</span>
                             </div>
                             <p className="text-sm text-text-muted dark:text-gray-400 leading-relaxed">
                                 Building a world where communication has no physical limits.
@@ -321,7 +321,7 @@ const LandingPage = () => {
                         </div>
                     </div>
                     <div className="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <p className="text-sm text-text-muted dark:text-gray-500">© 2023 De-Novo Inc. All rights reserved.</p>
+                        <p className="text-sm text-text-muted dark:text-gray-500">© 2023 EchoReach Inc. All rights reserved.</p>
                         <div className="flex gap-6">
                             <a className="text-text-muted dark:text-gray-500 hover:text-primary transition-colors" href="#"><span className="sr-only">Twitter</span><span className="material-symbols-outlined text-xl">share</span></a>
                             <a className="text-text-muted dark:text-gray-500 hover:text-primary transition-colors" href="#"><span className="sr-only">Instagram</span><span className="material-symbols-outlined text-xl">photo_camera</span></a>

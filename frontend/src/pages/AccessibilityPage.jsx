@@ -26,7 +26,7 @@ const AccessibilityPage = () => {
                                 style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDc86v5lBouPLxXOoHo_s2p7JcbT9efcdT5AkDfMB7fwRxHa-txRuM1p9wagcq4SafC8sVmdG9qjwSs1okbWgKDpLu7o_nQgEP3Tp9sGhFlq8czLKgrsy8YnpD3SnD8ZvnLxan6msKZ5GNg81_Jzw2d1Uc25f4pjgsdtb6be9a11E9rIjHzhIJv0IPDYOObkgtQwT3lfPC2sxZ1QgwdhhwbEVux0238_D-vanQkngmxxUfUOqafph0xdtr-9pqxVQRh5s92lKWeLso")' }}
                             ></div>
                             <div className="flex flex-col overflow-hidden">
-                                <h1 className="text-text-main dark:text-white text-base font-bold leading-tight truncate">De-Novo User</h1>
+                                <h1 className="text-text-main dark:text-white text-base font-bold leading-tight truncate">EchoReach User</h1>
                                 <p className="text-primary text-xs font-semibold uppercase tracking-wider">Online</p>
                             </div>
                         </div>

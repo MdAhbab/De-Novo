@@ -17,7 +17,7 @@ export default function Navbar() {
         <nav className="bg-primary text-white p-4 shadow-md sticky top-0 z-50" role="navigation" aria-label="Main Navigation">
             <div className="container mx-auto flex justify-between items-center">
                 <Link to="/" className="text-2xl font-bold focus:ring-2 focus:ring-white rounded p-1 outline-none">
-                    De-Novo
+                    EchoReach
                 </Link>
 
                 {/* Desktop Menu */}

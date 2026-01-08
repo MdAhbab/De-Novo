@@ -24,7 +24,7 @@ const DashboardPage = () => {
                             <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                                 <span className="material-symbols-outlined text-3xl">hearing_disabled</span>
                             </div>
-                            <h1 className="text-2xl font-extrabold tracking-tight">De-Novo</h1>
+                            <h1 className="text-2xl font-extrabold tracking-tight">EchoReach</h1>
                         </Link>
                     </div>
                     {/* Search Bar (Hidden on mobile, visible on tablet+) */}

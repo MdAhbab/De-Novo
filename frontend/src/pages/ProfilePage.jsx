@@ -12,7 +12,7 @@ const ProfilePage = () => {
                         <div className="flex items-center gap-12">
                             <Link to="/" className="flex items-center gap-3 text-primary hover:opacity-80 transition-opacity">
                                 <span className="material-symbols-outlined text-4xl">hearing_disabled</span>
-                                <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">De-Novo</span>
+                                <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">EchoReach</span>
                             </Link>
                             <nav className="hidden md:flex items-center gap-8">
                                 <Link to="/profile" className="text-sm font-bold text-slate-900 dark:text-white border-b-2 border-primary pb-0.5">Profile</Link>
@@ -268,7 +268,7 @@ const ProfilePage = () => {
 
             {/* Simple Footer */}
             <footer className="mt-auto py-8 text-center border-t border-slate-200 dark:border-slate-800">
-                <p className="text-slate-400 dark:text-slate-600 text-sm font-medium">© 2023 De-Novo. Designing for everyone.</p>
+                <p className="text-slate-400 dark:text-slate-600 text-sm font-medium">© 2023 EchoReach. Designing for everyone.</p>
             </footer>
         </div>
     );

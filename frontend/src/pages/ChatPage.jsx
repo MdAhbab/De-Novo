@@ -13,7 +13,7 @@ const ChatPage = () => {
                             <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                                 <span className="material-symbols-outlined text-2xl">forum</span>
                             </div>
-                            <h1 className="text-2xl font-bold tracking-tight dark:text-white">De-Novo</h1>
+                            <h1 className="text-2xl font-bold tracking-tight dark:text-white">EchoReach</h1>
                         </Link>
                     </div>
                     <button className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors text-slate-500 dark:text-slate-400">

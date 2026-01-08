@@ -56,12 +56,12 @@ const RegisterPage = () => {
                 <div className="absolute bottom-12 right-12 w-80 h-80 bg-white/10 rounded-full blur-3xl z-0 animate-float-delayed"></div>
 
                 <div className="relative z-20 text-white max-w-lg">
-                    <div className="mb-8 flex items-center gap-3">
+                    <Link to="/" className="mb-8 flex items-center gap-3 hover:opacity-90 transition-opacity w-fit">
                         <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-lg">
                             <span className="material-symbols-outlined text-3xl">diversity_3</span>
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight">De-Novo</h1>
-                    </div>
+                        <h1 className="text-3xl font-bold tracking-tight">EchoReach</h1>
+                    </Link>
                     <h2 className="text-5xl font-black mb-6 leading-tight">Join the Community.</h2>
                     <p className="text-lg text-white/90 font-medium leading-relaxed mb-8">
                         Create an account to personalize your experience. Access tools designed for your specific needs.
@@ -79,11 +79,23 @@ const RegisterPage = () => {
             {/* Right Side - Form */}
             <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 lg:p-12 relative bg-white dark:bg-gray-900 overflow-y-auto">
                 {/* Mobile Header */}
+                {/* Mobile Header */}
                 <div className="lg:hidden w-full flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-2 text-primary">
+                    <Link to="/" className="flex items-center gap-2 text-primary">
                         <span className="material-symbols-outlined text-3xl">diversity_3</span>
-                        <span className="text-xl font-bold">De-Novo</span>
-                    </div>
+                        <span className="text-xl font-bold">EchoReach</span>
+                    </Link>
+                    <Link to="/" className="text-sm font-bold text-slate-500 hover:text-primary">
+                        Back to Home
+                    </Link>
+                </div>
+
+                {/* Desktop Back Button */}
+                <div className="hidden lg:block absolute top-12 right-12 z-10">
+                    <Link to="/" className="flex items-center gap-2 text-slate-500 hover:text-primary font-bold transition-colors group">
+                        <span className="material-symbols-outlined text-xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                        Back to Home
+                    </Link>
                 </div>
 
                 <div className="w-full max-w-md space-y-6">
@@ -160,12 +172,12 @@ const RegisterPage = () => {
                                             onChange={() => toggleDisability(option.id)}
                                         />
                                         <div className={`p-4 rounded-xl border-2 transition-all duration-200 flex items-center gap-4 ${formData.disabilities.includes(option.id)
-                                                ? 'border-primary bg-primary/5 dark:bg-primary/10'
-                                                : 'border-slate-100 dark:border-slate-700 hover:border-primary/50 bg-white dark:bg-gray-800'
+                                            ? 'border-primary bg-primary/5 dark:bg-primary/10'
+                                            : 'border-slate-100 dark:border-slate-700 hover:border-primary/50 bg-white dark:bg-gray-800'
                                             }`}>
                                             <div className={`p-2 rounded-lg ${formData.disabilities.includes(option.id)
-                                                    ? 'bg-primary text-white'
-                                                    : `bg-${option.color}-50 dark:bg-gray-700 text-${option.color}-500 dark:text-${option.color}-400`
+                                                ? 'bg-primary text-white'
+                                                : `bg-${option.color}-50 dark:bg-gray-700 text-${option.color}-500 dark:text-${option.color}-400`
                                                 }`}>
                                                 <span className="material-symbols-outlined text-xl">{option.icon}</span>
                                             </div>
@@ -174,8 +186,8 @@ const RegisterPage = () => {
                                                 <p className="text-xs text-text-muted dark:text-gray-400">{option.desc}</p>
                                             </div>
                                             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${formData.disabilities.includes(option.id)
-                                                    ? 'border-primary bg-primary text-white'
-                                                    : 'border-slate-300 dark:border-slate-600'
+                                                ? 'border-primary bg-primary text-white'
+                                                : 'border-slate-300 dark:border-slate-600'
                                                 }`}>
                                                 {formData.disabilities.includes(option.id) && <span className="material-symbols-outlined text-[12px] font-bold">check</span>}
                                             </div>

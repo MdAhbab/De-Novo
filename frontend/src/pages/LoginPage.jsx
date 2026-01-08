@@ -33,12 +33,12 @@ const LoginPage = () => {
 
                 {/* Content Overlay */}
                 <div className="relative z-20 text-white max-w-lg">
-                    <div className="mb-8 flex items-center gap-3">
+                    <Link to="/" className="mb-8 flex items-center gap-3 hover:opacity-90 transition-opacity w-fit">
                         <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-lg">
                             <span className="material-symbols-outlined text-3xl">diversity_3</span>
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight">De-Novo</h1>
-                    </div>
+                        <h1 className="text-3xl font-bold tracking-tight">EchoReach</h1>
+                    </Link>
                     <h2 className="text-5xl font-black mb-6 leading-tight">Empowering Every Voice.</h2>
                     <p className="text-lg text-white/90 font-medium leading-relaxed mb-8">
                         Experience existing inclusivity. Real-time adaptations, voice-to-visual feedback, and a platform built for everyone.
@@ -56,7 +56,7 @@ const LoginPage = () => {
                             </div>
                             <div className="flex flex-col">
                                 <span className="font-bold text-lg">10k+ Users</span>
-                                <span className="text-xs opacity-75">Trust De-Novo daily</span>
+                                <span className="text-xs opacity-75">Trust EchoReach daily</span>
                             </div>
                         </div>
                     </div>
@@ -67,10 +67,21 @@ const LoginPage = () => {
             <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 lg:p-12 relative bg-white dark:bg-gray-900">
                 {/* Mobile Header (only visible on small screens) */}
                 <div className="lg:hidden w-full flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-2 text-primary">
+                    <Link to="/" className="flex items-center gap-2 text-primary">
                         <span className="material-symbols-outlined text-3xl">diversity_3</span>
-                        <span className="text-xl font-bold">De-Novo</span>
-                    </div>
+                        <span className="text-xl font-bold">EchoReach</span>
+                    </Link>
+                    <Link to="/" className="text-sm font-bold text-slate-500 hover:text-primary">
+                        Back to Home
+                    </Link>
+                </div>
+
+                {/* Desktop Back Button */}
+                <div className="hidden lg:block absolute top-12 right-12 z-10">
+                    <Link to="/" className="flex items-center gap-2 text-slate-500 hover:text-primary font-bold transition-colors group">
+                        <span className="material-symbols-outlined text-xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                        Back to Home
+                    </Link>
                 </div>
 
                 <div className="w-full max-w-md space-y-5">

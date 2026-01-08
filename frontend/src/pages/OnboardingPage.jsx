@@ -10,7 +10,7 @@ const OnboardingPage = () => {
     const slides = [
         {
             title: "Communication without barriers.",
-            desc: "De-Novo bridges the gap between different sensory experiences. Whether you sign, speak, or type, our platform translates your preferred method into what your friend needs to receive.",
+            desc: "EchoReach bridges the gap between different sensory experiences. Whether you sign, speak, or type, our platform translates your preferred method into what your friend needs to receive.",
             img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAMX_q9_SJRAr0FGvYD5dVFIPHG9K1T6zDSE0ZvOlbtqSAosSf0xaHiK9stfhyag8R7jVwoGY6e5vSkDcdbqDELKCOaDZ0fxpFeRReJobg87DJ4ADZudFJNASk53d8dKaWKhY2cuywyquULCB8EQit23-xnVhmZo4tDU_wZ9NzxnR6j6ZDURQ34zij6gjXV9qSfnABlK9kxsUDvthMnp1Jx3Tlbegb0vdAFIp0_VCIHwoLOPNt0F2Sy9wlGzJh5cNuszXuFcYPNWJ8",
             step: "Step 1 of 4"
         },
@@ -54,7 +54,7 @@ const OnboardingPage = () => {
                     <div className="size-8 text-primary">
                         <span className="material-symbols-outlined text-4xl">diversity_1</span>
                     </div>
-                    <h2 className="text-xl font-bold leading-tight tracking-tight">De-Novo</h2>
+                    <h2 className="text-xl font-bold leading-tight tracking-tight">EchoReach</h2>
                 </div>
                 <div className="flex gap-4 items-center">
                     {/* Voice Narration Toggle */}
@@ -79,7 +79,7 @@ const OnboardingPage = () => {
                 {/* Welcome Heading */}
                 <section className="w-full max-w-[960px] mb-8 text-center md:text-left">
                     <div className="flex flex-col gap-3">
-                        <h1 className="text-[#0c1b1d] dark:text-white text-4xl md:text-5xl font-black leading-tight tracking-[-0.033em]">Welcome to De-Novo</h1>
+                        <h1 className="text-[#0c1b1d] dark:text-white text-4xl md:text-5xl font-black leading-tight tracking-[-0.033em]">Welcome to EchoReach</h1>
                         <p className="text-[#4596a1] text-lg md:text-xl font-normal leading-normal max-w-2xl">Let's set up your experience to match your sensory needs before we begin.</p>
                     </div>
                 </section>

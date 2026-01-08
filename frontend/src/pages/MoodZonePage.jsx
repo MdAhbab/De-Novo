@@ -12,7 +12,7 @@ const MoodZonePage = () => {
                             <div className="p-2 bg-primary/10 rounded-lg text-primary">
                                 <span className="material-symbols-outlined">psychology_alt</span>
                             </div>
-                            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">De-Novo <span className="text-primary font-normal text-sm ml-1">Mood Zone</span></h1>
+                            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">EchoReach <span className="text-primary font-normal text-sm ml-1">Mood Zone</span></h1>
                         </Link>
                         <nav className="hidden md:flex gap-8">
                             <Link to="/dashboard" className="text-sm font-medium text-slate-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Home</Link>
