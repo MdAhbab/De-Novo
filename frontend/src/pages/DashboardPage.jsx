@@ -1,7 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const DashboardPage = () => {
+    const { user } = useAuth();
+
+    // Dynamic Date Formatting
+    const today = new Date();
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric'
+    }).format(today);
+
     return (
         <div className="bg-background-light dark:bg-background-dark text-[#111827] dark:text-gray-100 font-display min-h-screen flex flex-col overflow-x-hidden">
             {/* Top Navigation */}
@@ -54,7 +65,7 @@ const DashboardPage = () => {
                                     data-alt="Profile picture of Alex, smiling man with glasses"
                                     style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCcw2TNdlOvJSoWCyuiusnj9v0LZPLjqgwsmM8Q3YjCJrDu5Eq6Bbdyric2bJmdsbKIs9Ov_8ZedrWScxrjMjxmfKfv5iuuvFfvGz4YusYwROzWzMDNQOeqc9K58XYQAb4ILopn383HVu1VpgVoGVDwf_oJ6dgoLwv5MRcuYc-QqvPQuCBwiQs1I0feOKbDmIaKnBuHAi3ZrYRXGGHG8cGalhKvS2a7McL70OGUVETRDz8r6ApW7BJSgC7jiBsQ3GWY4qA1gIl1f9Q')" }}
                                 ></div>
-                                <span className="text-sm font-bold text-gray-700 dark:text-gray-200 hidden sm:block group-hover:text-primary">Alex</span>
+                                <span className="text-sm font-bold text-gray-700 dark:text-gray-200 hidden sm:block group-hover:text-primary">{user?.name || 'User'}</span>
                                 <span className="material-symbols-outlined text-gray-400 text-lg">expand_more</span>
                             </Link>
                         </div>
@@ -68,11 +79,11 @@ const DashboardPage = () => {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-gray-200 dark:border-gray-800">
                         <div>
                             <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
-                                Good Morning, Alex
+                                Good Morning, {user?.name?.split(' ')[0] || 'User'}
                             </h2>
                             <p className="text-lg text-primary dark:text-primary/80 font-medium flex items-center gap-2">
                                 <span className="material-symbols-outlined text-lg">calendar_today</span>
-                                Wednesday, October 25th
+                                {formattedDate}
                             </p>
                         </div>
                         <div className="bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-lg border border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-200 text-sm font-bold flex items-center gap-2">
@@ -271,13 +282,7 @@ const DashboardPage = () => {
                 </div>
             </main>
 
-            {/* Floating Accessibility Button */}
-            <div className="fixed bottom-6 right-6 z-50">
-                <button aria-label="Open Accessibility Tools" className="flex items-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-4 rounded-full shadow-2xl hover:scale-105 transition-transform focus:outline-none focus:ring-4 focus:ring-primary border-2 border-transparent hover:border-white/20">
-                    <span className="material-symbols-outlined text-3xl">accessibility_new</span>
-                    <span className="font-bold text-lg hidden sm:block">Accessibility</span>
-                </button>
-            </div>
+
         </div>
     );
 };

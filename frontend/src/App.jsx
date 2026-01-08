@@ -21,9 +21,10 @@ import AccessibilityToolbar from './components/common/AccessibilityToolbar';
 import Footer from './components/common/Footer';
 import LoadingSpinner from './components/common/LoadingSpinner';
 
+
+
 function ProtectedLayout() {
     const { user, loading } = useAuth();
-
     if (loading) return <LoadingSpinner fullScreen text="Verifying session..." />;
     if (!user) return <Navigate to="/login" />;
 
@@ -34,7 +35,6 @@ function ProtectedLayout() {
             <main className="flex-1">
                 <Outlet />
             </main>
-            <AccessibilityToolbar />
         </div>
     );
 }
@@ -47,7 +47,6 @@ function PublicLayout() {
                 <Outlet />
             </main>
             <Footer />
-            <AccessibilityToolbar />
         </div>
     )
 }
@@ -83,6 +82,7 @@ export default function App() {
                                 {/* Fallback */}
                                 <Route path="*" element={<Navigate to="/" />} />
                             </Routes>
+                            <AccessibilityToolbar />
                         </Router>
                     </ChatProvider>
                 </AccessibilityProvider>
