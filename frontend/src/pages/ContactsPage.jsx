@@ -1,0 +1,1 @@
+export default function ContactsPage() { return <div className="p-8"><h1 className="text-2xl font-bold dark:text-white">Contacts</h1><p className="dark:text-gray-400">Manage your contacts here.</p></div>; }
