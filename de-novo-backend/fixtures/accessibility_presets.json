@@ -1,0 +1,268 @@
+[
+  {
+    "model": "accessibility.accessibilitypreset",
+    "pk": 1,
+    "fields": {
+      "name": "Visual Impairment - High Contrast",
+      "description": "Optimized settings for users with low vision. Enables high contrast mode, large fonts, and text-to-speech.",
+      "disability_type": "visual",
+      "settings": {
+        "font_size": 24,
+        "high_contrast": true,
+        "color_blind_mode": "none",
+        "tts_enabled": true,
+        "tts_speed": 1.0,
+        "tts_voice": "en-US-Neural2-D"
+      },
+      "is_default": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.accessibilitypreset",
+    "pk": 2,
+    "fields": {
+      "name": "Visual Impairment - Color Blind",
+      "description": "Settings for color blind users. Adjusts color schemes and adds patterns/labels.",
+      "disability_type": "visual",
+      "settings": {
+        "font_size": 18,
+        "high_contrast": false,
+        "color_blind_mode": "deuteranopia",
+        "tts_enabled": false
+      },
+      "is_default": false,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.accessibilitypreset",
+    "pk": 3,
+    "fields": {
+      "name": "Hearing Impairment",
+      "description": "Settings for deaf and hard-of-hearing users. Enables visual notifications and haptic feedback.",
+      "disability_type": "hearing",
+      "settings": {
+        "font_size": 16,
+        "high_contrast": false,
+        "visual_notifications": true,
+        "haptic_feedback": true,
+        "auto_caption": true
+      },
+      "is_default": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.accessibilitypreset",
+    "pk": 4,
+    "fields": {
+      "name": "Speech Impairment",
+      "description": "Settings for users who cannot speak. Enables quick phrases and AI message composition.",
+      "disability_type": "speech",
+      "settings": {
+        "font_size": 16,
+        "quick_phrases_enabled": true,
+        "ai_compose_enabled": true,
+        "stt_enabled": false
+      },
+      "is_default": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 1,
+    "fields": {
+      "user": null,
+      "category": "greeting",
+      "phrase": "Hello! How are you?",
+      "shortcut": "👋",
+      "display_order": 0,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 2,
+    "fields": {
+      "user": null,
+      "category": "greeting",
+      "phrase": "Good morning!",
+      "shortcut": "🌅",
+      "display_order": 1,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 3,
+    "fields": {
+      "user": null,
+      "category": "greeting",
+      "phrase": "Good night!",
+      "shortcut": "🌙",
+      "display_order": 2,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 4,
+    "fields": {
+      "user": null,
+      "category": "common",
+      "phrase": "Yes",
+      "shortcut": "✅",
+      "display_order": 0,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 5,
+    "fields": {
+      "user": null,
+      "category": "common",
+      "phrase": "No",
+      "shortcut": "❌",
+      "display_order": 1,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 6,
+    "fields": {
+      "user": null,
+      "category": "common",
+      "phrase": "Thank you!",
+      "shortcut": "🙏",
+      "display_order": 2,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 7,
+    "fields": {
+      "user": null,
+      "category": "common",
+      "phrase": "I understand",
+      "shortcut": "👍",
+      "display_order": 3,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 8,
+    "fields": {
+      "user": null,
+      "category": "common",
+      "phrase": "Please wait",
+      "shortcut": "⏳",
+      "display_order": 4,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 9,
+    "fields": {
+      "user": null,
+      "category": "emergency",
+      "phrase": "I need help!",
+      "shortcut": "🆘",
+      "display_order": 0,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 10,
+    "fields": {
+      "user": null,
+      "category": "emergency",
+      "phrase": "Please call emergency services",
+      "shortcut": "🚨",
+      "display_order": 1,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 11,
+    "fields": {
+      "user": null,
+      "category": "emotion",
+      "phrase": "I'm happy",
+      "shortcut": "😊",
+      "display_order": 0,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 12,
+    "fields": {
+      "user": null,
+      "category": "emotion",
+      "phrase": "I'm sad",
+      "shortcut": "😢",
+      "display_order": 1,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 13,
+    "fields": {
+      "user": null,
+      "category": "emotion",
+      "phrase": "I'm tired",
+      "shortcut": "😴",
+      "display_order": 2,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 14,
+    "fields": {
+      "user": null,
+      "category": "question",
+      "phrase": "Can you repeat that?",
+      "shortcut": "🔄",
+      "display_order": 0,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accessibility.quickphrase",
+    "pk": 15,
+    "fields": {
+      "user": null,
+      "category": "question",
+      "phrase": "What time is it?",
+      "shortcut": "🕐",
+      "display_order": 1,
+      "is_system": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  }
+]

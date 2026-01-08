@@ -1,0 +1,36 @@
+# Core Django
+Django>=4.2
+djangorestframework>=3.14
+django-cors-headers>=4.3
+djangorestframework-simplejwt>=5.3
+django-environ>=0.11
+
+# Database
+mysqlclient>=2.2
+pymongo>=4.6
+
+# WebSockets for Real-time Chat
+channels>=4.0
+channels-redis>=4.1
+daphne>=4.0
+
+# Google Cloud AI/ML
+google-cloud-aiplatform>=1.38
+google-cloud-speech>=2.23
+google-cloud-texttospeech>=2.14
+google-cloud-vision>=3.5
+google-generativeai>=0.3
+
+# Security & Encryption
+cryptography>=41.0
+pycryptodome>=3.19
+
+# AI/ML Libraries
+numpy>=1.26
+pillow>=10.1
+opencv-python>=4.8
+
+# Utilities
+celery>=5.3
+redis>=5.0
+python-dotenv>=1.0

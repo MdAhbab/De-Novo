@@ -1,0 +1,162 @@
+[
+  {
+    "model": "mood.ambientsound",
+    "pk": 1,
+    "fields": {
+      "name": "Ocean Waves",
+      "category": "nature",
+      "file_url": "https://example.com/sounds/ocean-waves.mp3",
+      "thumbnail_url": "https://example.com/thumbnails/ocean.jpg",
+      "duration": 3600,
+      "description": "Calming ocean waves gently lapping on the shore.",
+      "recommended_moods": ["anxious", "sad", "frustrated"],
+      "is_active": true,
+      "play_count": 0,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "mood.ambientsound",
+    "pk": 2,
+    "fields": {
+      "name": "Rainfall",
+      "category": "nature",
+      "file_url": "https://example.com/sounds/rainfall.mp3",
+      "thumbnail_url": "https://example.com/thumbnails/rain.jpg",
+      "duration": 3600,
+      "description": "Gentle rain falling on leaves and rooftops.",
+      "recommended_moods": ["anxious", "tired", "frustrated"],
+      "is_active": true,
+      "play_count": 0,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "mood.ambientsound",
+    "pk": 3,
+    "fields": {
+      "name": "Forest Birds",
+      "category": "nature",
+      "file_url": "https://example.com/sounds/forest-birds.mp3",
+      "thumbnail_url": "https://example.com/thumbnails/forest.jpg",
+      "duration": 1800,
+      "description": "Birds singing in a peaceful forest.",
+      "recommended_moods": ["neutral", "calm", "happy"],
+      "is_active": true,
+      "play_count": 0,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "mood.ambientsound",
+    "pk": 4,
+    "fields": {
+      "name": "White Noise",
+      "category": "white_noise",
+      "file_url": "https://example.com/sounds/white-noise.mp3",
+      "thumbnail_url": "https://example.com/thumbnails/white-noise.jpg",
+      "duration": 7200,
+      "description": "Pure white noise for focus and concentration.",
+      "recommended_moods": ["anxious", "neutral"],
+      "is_active": true,
+      "play_count": 0,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "mood.ambientsound",
+    "pk": 5,
+    "fields": {
+      "name": "Pink Noise",
+      "category": "white_noise",
+      "file_url": "https://example.com/sounds/pink-noise.mp3",
+      "thumbnail_url": "https://example.com/thumbnails/pink-noise.jpg",
+      "duration": 7200,
+      "description": "Softer pink noise, great for sleep.",
+      "recommended_moods": ["tired", "anxious"],
+      "is_active": true,
+      "play_count": 0,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "mood.ambientsound",
+    "pk": 6,
+    "fields": {
+      "name": "Guided Breathing",
+      "category": "meditation",
+      "file_url": "https://example.com/sounds/breathing.mp3",
+      "thumbnail_url": "https://example.com/thumbnails/meditation.jpg",
+      "duration": 600,
+      "description": "10-minute guided breathing exercise for relaxation.",
+      "recommended_moods": ["anxious", "frustrated", "sad"],
+      "is_active": true,
+      "play_count": 0,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "mood.ambientsound",
+    "pk": 7,
+    "fields": {
+      "name": "Body Scan Meditation",
+      "category": "meditation",
+      "file_url": "https://example.com/sounds/body-scan.mp3",
+      "thumbnail_url": "https://example.com/thumbnails/bodyscan.jpg",
+      "duration": 900,
+      "description": "15-minute body scan meditation for deep relaxation.",
+      "recommended_moods": ["tired", "anxious", "frustrated"],
+      "is_active": true,
+      "play_count": 0,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "mood.ambientsound",
+    "pk": 8,
+    "fields": {
+      "name": "Uplifting Piano",
+      "category": "music",
+      "file_url": "https://example.com/sounds/piano.mp3",
+      "thumbnail_url": "https://example.com/thumbnails/piano.jpg",
+      "duration": 1800,
+      "description": "Gentle, uplifting piano music.",
+      "recommended_moods": ["sad", "neutral", "grateful"],
+      "is_active": true,
+      "play_count": 0,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "mood.ambientsound",
+    "pk": 9,
+    "fields": {
+      "name": "Energetic Beats",
+      "category": "music",
+      "file_url": "https://example.com/sounds/beats.mp3",
+      "thumbnail_url": "https://example.com/thumbnails/beats.jpg",
+      "duration": 1800,
+      "description": "Upbeat instrumental music to boost energy.",
+      "recommended_moods": ["tired", "happy", "energetic"],
+      "is_active": true,
+      "play_count": 0,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "mood.ambientsound",
+    "pk": 10,
+    "fields": {
+      "name": "Thunderstorm",
+      "category": "nature",
+      "file_url": "https://example.com/sounds/thunderstorm.mp3",
+      "thumbnail_url": "https://example.com/thumbnails/thunder.jpg",
+      "duration": 3600,
+      "description": "Distant thunder and rain for deep focus.",
+      "recommended_moods": ["anxious", "neutral"],
+      "is_active": true,
+      "play_count": 0,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  }
+]

@@ -1,0 +1,3 @@
+"""
+De-Novo Django Project
+"""
