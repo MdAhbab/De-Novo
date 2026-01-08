@@ -21,155 +21,162 @@ const LoginPage = () => {
             setIsSubmitting(false);
         }
     };
+
     return (
-        <div className="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden font-display text-[#0c1b1d] dark:text-white">
-            {/* TopNavBar Component (Adapted) */}
-            <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e6f3f4] dark:border-b-gray-800 bg-white dark:bg-[#111827] px-6 md:px-10 py-4 sticky top-0 z-50">
-                <div className="flex items-center gap-4 text-[#0c1b1d] dark:text-white">
-                    <div className="size-8 bg-[#e6f3f4] dark:bg-gray-800 rounded-lg flex items-center justify-center text-primary">
-                        <span className="material-symbols-outlined">diversity_3</span>
-                    </div>
-                    <Link to="/" className="text-lg md:text-xl font-bold leading-tight tracking-[-0.015em]">De-Novo</Link>
-                </div>
-                <div className="flex items-center gap-4">
-                    {/* Accessibility Controls Group */}
-                    <div className="hidden md:flex items-center gap-3 bg-[#f8fbfc] dark:bg-gray-900 border border-[#e6f3f4] dark:border-gray-700 px-3 py-1.5 rounded-full">
-                        <span className="text-sm font-bold text-[#4596a1] dark:text-gray-400">High Contrast</span>
-                        {/* ActionPanel Toggle reused here */}
-                        <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-[#e6f3f4] dark:bg-gray-700 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-[#008c9e] transition-colors">
-                            <div className="h-full w-[27px] rounded-full bg-white shadow-sm" style={{ boxShadow: "rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px" }}></div>
-                            <input aria-label="Enable high contrast mode" className="invisible absolute" type="checkbox" />
-                        </label>
-                    </div>
-                    <button aria-label="Text to speech settings" className="flex items-center justify-center size-10 overflow-hidden rounded-xl bg-[#e6f3f4] dark:bg-gray-800 text-[#0c1b1d] dark:text-white hover:bg-[#d1e9ec] dark:hover:bg-gray-700 transition-colors">
-                        <span className="material-symbols-outlined">volume_up</span>
-                    </button>
-                </div>
-            </header>
+        <div className="h-screen w-full flex bg-background-light dark:bg-background-dark font-display overflow-hidden">
+            {/* Left Side - Visual & Branding */}
+            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary items-center justify-center p-12">
+                {/* Abstract Background Elements */}
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-dark to-primary opacity-90 z-10"></div>
+                <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl z-0 animate-float"></div>
+                <div className="absolute bottom-12 right-12 w-80 h-80 bg-white/10 rounded-full blur-3xl z-0 animate-float-delayed"></div>
 
-            <div className="layout-container flex h-full grow flex-col">
-                <div className="flex flex-1 justify-center py-5 md:py-10 px-4 md:px-0">
-                    <div className="layout-content-container flex flex-col md:flex-row max-w-[1280px] w-full flex-1 gap-8 md:gap-16 items-center md:items-start md:px-10">
-                        {/* Left Column: Visual Context (Hidden on small screens) */}
-                        <div className="hidden md:flex flex-1 w-full h-full min-h-[600px] flex-col justify-end p-10 rounded-3xl relative overflow-hidden bg-[#008c9e]">
-                            {/* Using CSS gradient for texture instead of image for base */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-[#00606d] to-[#008c9e] opacity-90"></div>
-                            {/* Image with data-alt */}
-                            <img
-                                alt="Background texture"
-                                className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-40"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuejiCeemeI1805sDDnnslDGOHD0oZEkb2TmMtl4EEUU6hEV1AK0GDcqhavKx2vi9zmnlmQ7n-TczI5G__Ex_2Co2r2TwY-bxMVjR4WAfqKugp36zAq2G5NZSIRW1lqNpCNG_BgRGPHVypypn3XBDOoLdV7Sfh0Vsyb6WV-XzlDpLOstEoF3jjIRK8JPg0P-0xx8qT9N323Yi89WZNnPGwGlzyuaxTLFT9biXZUhTmZSYYGL0o9RhKK8ENLFz6_Ppk2KSJB-7wpWg"
+                {/* Content Overlay */}
+                <div className="relative z-20 text-white max-w-lg">
+                    <div className="mb-8 flex items-center gap-3">
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-lg">
+                            <span className="material-symbols-outlined text-3xl">diversity_3</span>
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight">De-Novo</h1>
+                    </div>
+                    <h2 className="text-5xl font-black mb-6 leading-tight">Empowering Every Voice.</h2>
+                    <p className="text-lg text-white/90 font-medium leading-relaxed mb-8">
+                        Experience existing inclusivity. Real-time adaptations, voice-to-visual feedback, and a platform built for everyone.
+                    </p>
+
+                    {/* Testimonial/Badge */}
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl shadow-xl">
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="flex -space-x-3">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-primary bg-slate-200 flex items-center justify-center text-xs font-bold text-primary-dark">
+                                        <span className="material-symbols-outlined text-sm">person</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-bold text-lg">10k+ Users</span>
+                                <span className="text-xs opacity-75">Trust De-Novo daily</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Side - Login Form */}
+            <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 lg:p-12 relative bg-white dark:bg-gray-900">
+                {/* Mobile Header (only visible on small screens) */}
+                <div className="lg:hidden w-full flex justify-between items-center mb-6">
+                    <div className="flex items-center gap-2 text-primary">
+                        <span className="material-symbols-outlined text-3xl">diversity_3</span>
+                        <span className="text-xl font-bold">De-Novo</span>
+                    </div>
+                </div>
+
+                <div className="w-full max-w-md space-y-5">
+                    <div className="text-center lg:text-left">
+                        <h2 className="text-3xl font-black text-text-main dark:text-white mb-1">Welcome Back</h2>
+                        <p className="text-text-muted dark:text-gray-400 text-sm">Please enter your details to sign in.</p>
+                    </div>
+
+                    {/* Quick Login Options */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <button className="flex flex-col items-center justify-center p-3 border border-slate-200 dark:border-gray-700 rounded-xl hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all group">
+                            <span className="material-symbols-outlined text-2xl text-slate-400 group-hover:text-primary mb-1 transition-colors">mic</span>
+                            <span className="text-xs font-bold text-slate-600 dark:text-gray-300">Voice Login</span>
+                        </button>
+                        <button className="flex flex-col items-center justify-center p-3 border border-slate-200 dark:border-gray-700 rounded-xl hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all group">
+                            <span className="material-symbols-outlined text-2xl text-slate-400 group-hover:text-primary mb-1 transition-colors">fingerprint</span>
+                            <span className="text-xs font-bold text-slate-600 dark:text-gray-300">Biometric</span>
+                        </button>
+                    </div>
+
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-slate-200 dark:border-gray-800"></div>
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                            <span className="px-4 bg-white dark:bg-gray-900 text-slate-500">Or continue with email</span>
+                        </div>
+                    </div>
+
+                    <form className="mt-6 space-y-4" onSubmit={handleLogin}>
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="email" className="block text-xs font-bold text-text-main dark:text-white mb-1.5">Email Address</label>
+                                <div className="relative">
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        required
+                                        className="appearance-none block w-full px-4 pl-10 py-3 border border-slate-200 dark:border-gray-700 rounded-xl bg-slate-50 dark:bg-gray-800 text-text-main dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium text-sm"
+                                        placeholder="name@company.com"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    />
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span className="material-symbols-outlined text-slate-400 text-lg">mail</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <label htmlFor="password" className="block text-xs font-bold text-text-main dark:text-white">Password</label>
+                                    <div className="text-xs">
+                                        <a href="#" className="font-bold text-primary hover:text-primary-dark transition-colors">Forgot password?</a>
+                                    </div>
+                                </div>
+                                <div className="relative">
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        required
+                                        className="appearance-none block w-full px-4 pl-10 py-3 border border-slate-200 dark:border-gray-700 rounded-xl bg-slate-50 dark:bg-gray-800 text-text-main dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium text-sm"
+                                        placeholder="••••••••"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    />
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span className="material-symbols-outlined text-slate-400 text-lg">lock</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center">
+                            <input
+                                id="remember-me"
+                                name="remember-me"
+                                type="checkbox"
+                                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded cursor-pointer"
                             />
-                            <div className="relative z-10 text-white max-w-md">
-                                <div className="mb-4 size-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-4xl text-white">record_voice_over</span>
-                                </div>
-                                <h2 className="text-4xl font-black tracking-tight mb-4">Empowering every voice.</h2>
-                                <p className="text-lg opacity-90 font-medium leading-relaxed">Join a platform built from the ground up for inclusive communication. Experience real-time sign-to-text and voice-to-visual feedback.</p>
-                            </div>
+                            <label htmlFor="remember-me" className="ml-2 block text-xs font-medium text-slate-600 dark:text-gray-300">
+                                Remember me for 30 days
+                            </label>
                         </div>
 
-                        {/* Right Column: Login Form */}
-                        <div className="flex flex-1 w-full max-w-[560px] flex-col justify-center">
-                            {/* PageHeading Component */}
-                            <div className="flex flex-col gap-3 mb-8">
-                                <p className="text-[#0c1b1d] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Welcome Back</p>
-                                <p className="text-[#4596a1] dark:text-gray-400 text-lg font-normal leading-normal">Sign in to access your dashboard</p>
-                            </div>
-
-                            {/* Priority Access Methods */}
-                            <div className="grid grid-cols-2 gap-4 mb-8">
-                                <button className="group flex flex-col items-center justify-center gap-3 p-5 h-32 rounded-2xl border-2 border-[#008c9e] bg-[#f0f9fa] dark:bg-[#008c9e]/10 dark:border-[#008c9e] hover:bg-[#e0f5f7] dark:hover:bg-[#008c9e]/20 transition-all focus:ring-4 focus:ring-[#008c9e]/30">
-                                    <span className="material-symbols-outlined text-4xl text-[#008c9e] dark:text-[#4fd1e3] group-hover:scale-110 transition-transform">mic</span>
-                                    <span className="text-[#008c9e] dark:text-[#4fd1e3] font-bold">Voice Login</span>
-                                </button>
-                                <button className="group flex flex-col items-center justify-center gap-3 p-5 h-32 rounded-2xl border-2 border-transparent bg-white dark:bg-gray-800 shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] transition-all focus:ring-4 focus:ring-gray-200">
-                                    <span className="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-500 group-hover:text-[#008c9e] transition-colors">fingerprint</span>
-                                    <span className="text-gray-600 dark:text-gray-300 font-bold">Biometric</span>
-                                </button>
-                            </div>
-
-                            <div className="relative flex py-2 items-center mb-8">
-                                <div className="flex-grow border-t border-[#e6f3f4] dark:border-gray-700"></div>
-                                <span className="flex-shrink-0 mx-4 text-gray-400 text-sm font-bold uppercase">Or login with email</span>
-                                <div className="flex-grow border-t border-[#e6f3f4] dark:border-gray-700"></div>
-                            </div>
-
-                            <form className="flex flex-col gap-5" onSubmit={handleLogin}>
-                                {/* TextField Component 1 (Email) */}
-                                <label className="flex flex-col w-full">
-                                    <p className="text-[#0c1b1d] dark:text-white text-base font-bold leading-normal pb-2">Email Address</p>
-                                    <div className="relative">
-                                        <input
-                                            className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0c1b1d] dark:text-white border-2 border-[#cde6ea] dark:border-gray-700 bg-[#f8fbfc] dark:bg-gray-800 focus:border-[#008c9e] focus:ring-0 h-16 placeholder:text-[#4596a1] p-[15px] pl-[50px] text-lg font-normal leading-normal transition-colors"
-                                            placeholder="name@example.com"
-                                            value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            required
-                                        />
-                                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#4596a1]">mail</span>
-                                    </div>
-                                </label>
-
-                                {/* TextField Component 2 (Password) */}
-                                <label className="flex flex-col w-full group/password">
-                                    <div className="flex justify-between items-center pb-2">
-                                        <p className="text-[#0c1b1d] dark:text-white text-base font-bold leading-normal">Password</p>
-                                        <a className="text-sm font-bold text-[#008c9e] hover:underline" href="#">Forgot password?</a>
-                                    </div>
-                                    <div className="relative">
-                                        <input
-                                            className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0c1b1d] dark:text-white border-2 border-[#cde6ea] dark:border-gray-700 bg-[#f8fbfc] dark:bg-gray-800 focus:border-[#008c9e] focus:ring-0 h-16 placeholder:text-[#4596a1] p-[15px] pl-[50px] text-lg font-normal leading-normal transition-colors"
-                                            placeholder="Enter your password"
-                                            type="password"
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                            required
-                                        />
-                                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#4596a1]">lock</span>
-                                        <button className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4596a1] hover:text-[#008c9e] p-1 rounded-full hover:bg-[#e6f3f4] dark:hover:bg-gray-700 transition-colors" type="button">
-                                            <span className="material-symbols-outlined">visibility</span>
-                                        </button>
-                                    </div>
-                                </label>
-
-                                {/* Remember Me */}
-                                <label className="flex items-center gap-3 cursor-pointer py-2 w-max">
-                                    <div className="relative flex items-center">
-                                        <input className="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border-2 border-[#cde6ea] dark:border-gray-600 bg-white dark:bg-gray-800 checked:border-[#008c9e] checked:bg-[#008c9e] transition-all" type="checkbox" />
-                                        <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity">
-                                            <span className="material-symbols-outlined text-base font-bold">check</span>
-                                        </span>
-                                    </div>
-                                    <span className="text-[#0c1b1d] dark:text-gray-300 text-base font-medium">Remember me</span>
-                                </label>
-
-                                {/* Primary Action */}
-                                <button type="submit" disabled={isSubmitting} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 bg-[#008c9e] hover:bg-[#007a8a] text-white gap-2 text-lg font-bold leading-normal tracking-[0.015em] px-5 shadow-lg shadow-[#008c9e]/20 transition-all active:scale-[0.99] text-center disabled:opacity-70 disabled:cursor-not-allowed">
-                                    <span className="truncate">{isSubmitting ? 'Signing In...' : 'Sign In'}</span>
-                                    {!isSubmitting && <span className="material-symbols-outlined" data-icon="ArrowRight" data-size="24px">arrow_forward</span>}
-                                </button>
-                            </form>
-
-                            {/* Social Login */}
-                            <div className="mt-8">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <button className="flex items-center justify-center gap-2 h-12 rounded-xl border border-[#cde6ea] dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-[#f8fbfc] dark:hover:bg-gray-700 transition-colors">
-                                        <span className="font-bold text-[#0c1b1d] dark:text-white">Google</span>
-                                    </button>
-                                    <button className="flex items-center justify-center gap-2 h-12 rounded-xl border border-[#cde6ea] dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-[#f8fbfc] dark:hover:bg-gray-700 transition-colors">
-                                        <span className="font-bold text-[#0c1b1d] dark:text-white">Apple</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="mt-8 text-center">
-                                <p className="text-[#4596a1] dark:text-gray-400 text-base font-medium">
-                                    Don't have an account? <Link to="/register" className="text-[#008c9e] font-bold hover:underline">Create Account</Link>
-                                </p>
-                            </div>
+                        <div>
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg shadow-primary/20 text-base font-bold text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+                            >
+                                {isSubmitting ? 'Signing in...' : 'Sign in'}
+                            </button>
                         </div>
-                    </div>
+
+
+                    </form>
+
+                    <p className="mt-6 text-center text-xs text-slate-600 dark:text-gray-400">
+                        Don't have an account?{' '}
+                        <Link to="/register" className="font-bold text-primary hover:text-primary-dark transition-colors">
+                            Create free account
+                        </Link>
+                    </p>
                 </div>
             </div>
         </div>
