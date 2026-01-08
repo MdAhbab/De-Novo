@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Accessibility Settings - De-Novo</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#008c9e",
+                        "primary-dark": "#006c7a",
+                        "background-light": "#f8fbfc",
+                        "background-dark": "#111827",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1f2937",
+                        "border-light": "#e6f3f4",
+                        "border-dark": "#374151",
+                        "text-main": "#0c1b1d",
+                        "text-muted": "#4596a1",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "2xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #008c9e;
+            cursor: pointer;
+            border: 4px solid #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .range-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #008c9e;
+            cursor: pointer;
+            border: 4px solid #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-white font-display overflow-hidden">
+    <div class="flex h-screen w-full">
+        <!-- Side Navigation -->
+        <aside
+            class="hidden lg:flex flex-col w-72 h-full border-r border-border-light bg-surface-light dark:bg-surface-dark dark:border-border-dark flex-shrink-0 z-20">
+            <div class="p-6 flex flex-col h-full justify-between">
+                <div class="flex flex-col gap-8">
+                    <!-- Profile Summary -->
+                    <div class="flex gap-4 items-center p-3 rounded-xl bg-background-light dark:bg-gray-800/50">
+                        <div class="bg-center bg-no-repeat bg-cover rounded-full size-12 shadow-sm shrink-0 border-2 border-primary/20"
+                            data-alt="User profile picture showing a smiling person"
+                            style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDc86v5lBouPLxXOoHo_s2p7JcbT9efcdT5AkDfMB7fwRxHa-txRuM1p9wagcq4SafC8sVmdG9qjwSs1okbWgKDpLu7o_nQgEP3Tp9sGhFlq8czLKgrsy8YnpD3SnD8ZvnLxan6msKZ5GNg81_Jzw2d1Uc25f4pjgsdtb6be9a11E9rIjHzhIJv0IPDYOObkgtQwT3lfPC2sxZ1QgwdhhwbEVux0238_D-vanQkngmxxUfUOqafph0xdtr-9pqxVQRh5s92lKWeLso");'>
+                        </div>
+                        <div class="flex flex-col overflow-hidden">
+                            <h1 class="text-text-main dark:text-white text-base font-bold leading-tight truncate">
+                                De-Novo User</h1>
+                            <p class="text-primary text-xs font-semibold uppercase tracking-wider">Online</p>
+                        </div>
+                    </div>
+                    <!-- Navigation Links -->
+                    <nav class="flex flex-col gap-2">
+                        <a class="flex items-center gap-4 px-4 py-3 rounded-xl text-text-main dark:text-gray-300 hover:bg-background-light dark:hover:bg-gray-800 transition-colors group"
+                            href="#">
+                            <span
+                                class="material-symbols-outlined text-[24px] text-gray-500 group-hover:text-primary transition-colors">home</span>
+                            <span class="text-sm font-semibold">Home</span>
+                        </a>
+                        <a class="flex items-center gap-4 px-4 py-3 rounded-xl text-text-main dark:text-gray-300 hover:bg-background-light dark:hover:bg-gray-800 transition-colors group"
+                            href="#">
+                            <span
+                                class="material-symbols-outlined text-[24px] text-gray-500 group-hover:text-primary transition-colors">chat_bubble</span>
+                            <span class="text-sm font-semibold">Messages</span>
+                            <span
+                                class="ml-auto bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">3</span>
+                        </a>
+                        <a class="flex items-center gap-4 px-4 py-3 rounded-xl text-text-main dark:text-gray-300 hover:bg-background-light dark:hover:bg-gray-800 transition-colors group"
+                            href="#">
+                            <span
+                                class="material-symbols-outlined text-[24px] text-gray-500 group-hover:text-primary transition-colors">groups</span>
+                            <span class="text-sm font-semibold">Communities</span>
+                        </a>
+                        <!-- Active State -->
+                        <a class="flex items-center gap-4 px-4 py-3 rounded-xl bg-primary/10 text-primary dark:text-primary transition-colors"
+                            href="#">
+                            <span class="material-symbols-outlined text-[24px] fill-1">settings_accessibility</span>
+                            <span class="text-sm font-bold">Accessibility</span>
+                        </a>
+                        <a class="flex items-center gap-4 px-4 py-3 rounded-xl text-text-main dark:text-gray-300 hover:bg-background-light dark:hover:bg-gray-800 transition-colors group"
+                            href="#">
+                            <span
+                                class="material-symbols-outlined text-[24px] text-gray-500 group-hover:text-primary transition-colors">person</span>
+                            <span class="text-sm font-semibold">Profile</span>
+                        </a>
+                    </nav>
+                </div>
+                <div class="px-2">
+                    <button
+                        class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-text-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-medium">
+                        <span class="material-symbols-outlined text-[20px]">logout</span>
+                        Log Out
+                    </button>
+                </div>
+            </div>
+        </aside>
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+            <!-- Header -->
+            <header
+                class="flex-shrink-0 flex items-center justify-between border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-6 py-4 z-10">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden p-2 -ml-2 text-gray-500 hover:text-primary">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <div class="size-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined">accessibility_new</span>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-text-main dark:text-white leading-tight">Accessibility
+                                Preferences</h2>
+                            <p class="text-sm text-text-muted hidden sm:block">Customize your experience for vision,
+                                hearing, and motor needs.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button
+                        class="hidden sm:flex h-10 px-6 items-center justify-center rounded-xl bg-background-light dark:bg-gray-800 text-text-main dark:text-gray-200 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        Reset Defaults
+                    </button>
+                    <button
+                        class="flex h-10 px-6 items-center justify-center rounded-xl bg-primary text-white text-sm font-bold shadow-lg shadow-primary/30 hover:bg-primary-dark transition-all active:scale-95">
+                        Save Changes
+                    </button>
+                </div>
+            </header>
+            <!-- Scrollable Settings -->
+            <div class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark p-4 lg:p-8">
+                <div class="max-w-[1400px] mx-auto grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
+                    <!-- LEFT COLUMN: Settings Controls -->
+                    <div class="xl:col-span-8 flex flex-col gap-8">
+                        <!-- VISUAL SETTINGS -->
+                        <section class="flex flex-col gap-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="material-symbols-outlined text-primary">visibility</span>
+                                <h3 class="text-lg font-bold text-text-main dark:text-white">Visual Experience</h3>
+                            </div>
+                            <!-- Card: Typography & Theme -->
+                            <div
+                                class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border border-border-light dark:border-border-dark shadow-sm">
+                                <!-- Font Size Slider -->
+                                <div class="mb-8">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <label class="text-sm font-bold text-text-main dark:text-white">Base Font
+                                            Size</label>
+                                        <span
+                                            class="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">18px</span>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <span class="text-xs font-medium text-gray-400">Aa</span>
+                                        <input
+                                            class="range-slider w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                                            max="32" min="14" type="range" value="18" />
+                                        <span class="text-xl font-bold text-gray-900 dark:text-white">Aa</span>
+                                    </div>
+                                </div>
+                                <div class="h-px w-full bg-border-light dark:bg-border-dark mb-6"></div>
+                                <!-- Theme & Contrast Grid -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Theme Selector -->
+                                    <div>
+                                        <label
+                                            class="block text-sm font-bold text-text-main dark:text-white mb-3">Interface
+                                            Theme</label>
+                                        <div class="flex bg-background-light dark:bg-gray-800 p-1 rounded-xl">
+                                            <button
+                                                class="flex-1 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">Light</button>
+                                            <button
+                                                class="flex-1 py-2 rounded-lg bg-white dark:bg-gray-600 shadow-sm text-sm font-bold text-primary dark:text-white transition-all">Dark</button>
+                                            <button
+                                                class="flex-1 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">System</button>
+                                        </div>
+                                    </div>
+                                    <!-- High Contrast Toggle -->
+                                    <div
+                                        class="flex items-center justify-between p-4 rounded-xl border border-border-light dark:border-border-dark bg-background-light/50 dark:bg-gray-800/30">
+                                        <div>
+                                            <p class="text-sm font-bold text-text-main dark:text-white">High Contrast
+                                            </p>
+                                            <p class="text-xs text-text-muted mt-0.5">Enhance borders &amp; text</p>
+                                        </div>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input class="sr-only peer" type="checkbox" value="" />
+                                            <div
+                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 dark:peer-focus:ring-primary/80 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary">
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Card: Color Blindness -->
+                            <div
+                                class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border border-border-light dark:border-border-dark shadow-sm">
+                                <label class="block text-sm font-bold text-text-main dark:text-white mb-4">Color
+                                    Correction Filter</label>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                                    <!-- Option 1 -->
+                                    <label class="cursor-pointer group">
+                                        <input checked="" class="peer sr-only" name="color-filter" type="radio" />
+                                        <div
+                                            class="p-3 rounded-xl border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary/5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex flex-col items-center gap-2">
+                                            <div class="size-8 rounded-full bg-gradient-to-br from-red-500 via-green-500 to-blue-500 shadow-sm"
+                                                data-alt="Full color spectrum gradient"></div>
+                                            <span
+                                                class="text-xs font-semibold text-gray-600 dark:text-gray-300 peer-checked:text-primary">None</span>
+                                        </div>
+                                    </label>
+                                    <!-- Option 2 -->
+                                    <label class="cursor-pointer group">
+                                        <input class="peer sr-only" name="color-filter" type="radio" />
+                                        <div
+                                            class="p-3 rounded-xl border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary/5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex flex-col items-center gap-2">
+                                            <div class="size-8 rounded-full bg-gradient-to-br from-yellow-500 via-gray-400 to-blue-600 shadow-sm"
+                                                data-alt="Protanopia simulation gradient"></div>
+                                            <span
+                                                class="text-xs font-semibold text-gray-600 dark:text-gray-300 peer-checked:text-primary">Protanopia</span>
+                                        </div>
+                                    </label>
+                                    <!-- Option 3 -->
+                                    <label class="cursor-pointer group">
+                                        <input class="peer sr-only" name="color-filter" type="radio" />
+                                        <div
+                                            class="p-3 rounded-xl border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary/5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex flex-col items-center gap-2">
+                                            <div class="size-8 rounded-full bg-gradient-to-br from-orange-400 via-blue-200 to-blue-700 shadow-sm"
+                                                data-alt="Deuteranopia simulation gradient"></div>
+                                            <span
+                                                class="text-xs font-semibold text-gray-600 dark:text-gray-300 peer-checked:text-primary">Deuteranopia</span>
+                                        </div>
+                                    </label>
+                                    <!-- Option 4 -->
+                                    <label class="cursor-pointer group">
+                                        <input class="peer sr-only" name="color-filter" type="radio" />
+                                        <div
+                                            class="p-3 rounded-xl border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary/5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex flex-col items-center gap-2">
+                                            <div class="size-8 rounded-full bg-gradient-to-br from-red-400 via-cyan-200 to-cyan-600 shadow-sm"
+                                                data-alt="Tritanopia simulation gradient"></div>
+                                            <span
+                                                class="text-xs font-semibold text-gray-600 dark:text-gray-300 peer-checked:text-primary">Tritanopia</span>
+                                        </div>
+                                    </label>
+                                    <!-- Option 5 -->
+                                    <label class="cursor-pointer group">
+                                        <input class="peer sr-only" name="color-filter" type="radio" />
+                                        <div
+                                            class="p-3 rounded-xl border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary/5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex flex-col items-center gap-2">
+                                            <div class="size-8 rounded-full bg-gradient-to-br from-gray-400 via-gray-300 to-gray-600 shadow-sm"
+                                                data-alt="Grayscale gradient"></div>
+                                            <span
+                                                class="text-xs font-semibold text-gray-600 dark:text-gray-300 peer-checked:text-primary">Grayscale</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </section>
+                        <!-- AUDIO SETTINGS -->
+                        <section class="flex flex-col gap-4">
+                            <div class="flex items-center gap-2 mb-2 pt-4">
+                                <span class="material-symbols-outlined text-primary">record_voice_over</span>
+                                <h3 class="text-lg font-bold text-text-main dark:text-white">Text-to-Speech (TTS)</h3>
+                            </div>
+                            <div
+                                class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border border-border-light dark:border-border-dark shadow-sm">
+                                <div class="flex flex-col md:flex-row gap-8">
+                                    <!-- Voice Selection -->
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-bold text-text-main dark:text-white mb-2">Voice
+                                            Model</label>
+                                        <div class="relative">
+                                            <select
+                                                class="w-full h-12 rounded-xl border-border-light dark:border-gray-600 bg-background-light dark:bg-gray-800 text-text-main dark:text-white pl-4 pr-10 focus:ring-2 focus:ring-primary focus:border-transparent appearance-none">
+                                                <option>Sarah (English US) - Natural</option>
+                                                <option>David (English UK) - Natural</option>
+                                                <option>Elena (Spanish) - Standard</option>
+                                            </select>
+                                            <span
+                                                class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+                                        </div>
+                                        <button
+                                            class="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-primary text-primary hover:bg-primary/5 transition-colors font-bold text-sm">
+                                            <span class="material-symbols-outlined">play_circle</span>
+                                            Play Test Sample
+                                        </button>
+                                    </div>
+                                    <!-- Sliders -->
+                                    <div class="flex-1 flex flex-col gap-6">
+                                        <div>
+                                            <div class="flex justify-between mb-2">
+                                                <label class="text-xs font-bold uppercase text-gray-500">Speed</label>
+                                                <span class="text-xs font-mono text-primary">1.0x</span>
+                                            </div>
+                                            <input
+                                                class="range-slider w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg"
+                                                type="range" />
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between mb-2">
+                                                <label class="text-xs font-bold uppercase text-gray-500">Pitch</label>
+                                                <span class="text-xs font-mono text-primary">Normal</span>
+                                            </div>
+                                            <input
+                                                class="range-slider w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg"
+                                                type="range" />
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between mb-2">
+                                                <label class="text-xs font-bold uppercase text-gray-500">Volume</label>
+                                                <span class="text-xs font-mono text-primary">80%</span>
+                                            </div>
+                                            <input
+                                                class="range-slider w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg"
+                                                type="range" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <!-- INPUT & NAVIGATION (Grid of smaller cards) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                            <!-- STT Card -->
+                            <div class="flex flex-col gap-2">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-primary">mic</span>
+                                    <h3 class="text-lg font-bold text-text-main dark:text-white">Dictation</h3>
+                                </div>
+                                <div
+                                    class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border border-border-light dark:border-border-dark shadow-sm flex-1">
+                                    <div class="flex flex-col gap-4">
+                                        <div>
+                                            <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Primary
+                                                Language</label>
+                                            <div class="relative">
+                                                <select
+                                                    class="w-full h-10 rounded-lg border-border-light dark:border-gray-600 bg-background-light dark:bg-gray-800 text-sm pl-3 pr-8">
+                                                    <option>English (United States)</option>
+                                                    <option>Spanish (Mexico)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <label class="flex items-center justify-between cursor-pointer">
+                                            <span
+                                                class="text-sm font-medium text-text-main dark:text-white">Auto-Punctuation</span>
+                                            <input checked=""
+                                                class="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                                                type="checkbox" />
+                                        </label>
+                                        <label class="flex items-center justify-between cursor-pointer">
+                                            <span class="text-sm font-medium text-text-main dark:text-white">Continuous
+                                                Listening</span>
+                                            <div class="relative inline-flex items-center cursor-pointer">
+                                                <input class="sr-only peer" type="checkbox" value="" />
+                                                <div
+                                                    class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary">
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <button
+                                            class="mt-2 flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-text-main dark:text-white transition-colors text-sm font-bold">
+                                            <span class="material-symbols-outlined text-[20px]">mic</span>
+                                            Test Mic
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Navigation Card -->
+                            <div class="flex flex-col gap-2">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-primary">keyboard_command_key</span>
+                                    <h3 class="text-lg font-bold text-text-main dark:text-white">Interaction</h3>
+                                </div>
+                                <div
+                                    class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border border-border-light dark:border-border-dark shadow-sm flex-1">
+                                    <div class="flex flex-col gap-4">
+                                        <label class="flex items-center justify-between cursor-pointer py-1">
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-bold text-text-main dark:text-white">Keyboard
+                                                    Shortcuts</span>
+                                                <span class="text-xs text-text-muted">Press '?' to view list</span>
+                                            </div>
+                                            <div class="relative inline-flex items-center cursor-pointer">
+                                                <input checked="" class="sr-only peer" type="checkbox" value="" />
+                                                <div
+                                                    class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary">
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <div class="h-px bg-border-light dark:bg-border-dark"></div>
+                                        <div>
+                                            <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Focus
+                                                Indicator Style</label>
+                                            <div class="flex gap-2">
+                                                <button
+                                                    class="flex-1 py-1.5 px-2 rounded border border-primary bg-primary/10 text-primary text-xs font-bold">Glow</button>
+                                                <button
+                                                    class="flex-1 py-1.5 px-2 rounded border border-gray-200 dark:border-gray-600 text-gray-500 text-xs font-medium">Solid</button>
+                                                <button
+                                                    class="flex-1 py-1.5 px-2 rounded border border-gray-200 dark:border-gray-600 text-gray-500 text-xs font-medium">Underline</button>
+                                            </div>
+                                        </div>
+                                        <label
+                                            class="flex items-start gap-3 p-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/50 mt-1">
+                                            <input
+                                                class="mt-1 w-4 h-4 rounded border-orange-300 text-orange-500 focus:ring-orange-500 bg-white"
+                                                type="checkbox" />
+                                            <div class="flex flex-col">
+                                                <span
+                                                    class="text-sm font-bold text-orange-800 dark:text-orange-200">Screen
+                                                    Reader Optimized</span>
+                                                <span class="text-xs text-orange-600 dark:text-orange-300/70">Linearizes
+                                                    layout structure</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-10"></div> <!-- Bottom spacer -->
+                    </div>
+                    <!-- RIGHT COLUMN: Sticky Preview Pane -->
+                    <div class="hidden xl:block xl:col-span-4">
+                        <div class="sticky top-4 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-gray-500 uppercase text-xs tracking-wider">Live Preview</h4>
+                                <span
+                                    class="text-[10px] bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-500">Read-only</span>
+                            </div>
+                            <!-- Preview Card -->
+                            <div
+                                class="bg-surface-light dark:bg-surface-dark rounded-2xl border-2 border-dashed border-primary/20 p-6 shadow-lg relative overflow-hidden group">
+                                <!-- Sample Content -->
+                                <div class="relative z-10 flex flex-col gap-4 transition-all duration-300">
+                                    <div class="flex items-center gap-3">
+                                        <div class="size-10 rounded-full bg-gray-200 dark:bg-gray-700"
+                                            data-alt="Placeholder for user avatar in preview"></div>
+                                        <div class="space-y-1">
+                                            <div class="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse">
+                                            </div>
+                                            <div class="h-2 w-16 bg-gray-100 dark:bg-gray-800 rounded"></div>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                        <div class="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse">
+                                        </div>
+                                        <div class="h-4 w-5/6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                    </div>
+                                    <div class="p-3 bg-primary/5 border-l-4 border-primary rounded-r-lg">
+                                        <p class="text-text-main dark:text-white font-display text-lg leading-relaxed">
+                                            The quick brown fox jumps over the lazy dog.
+                                        </p>
+                                    </div>
+                                    <div class="flex gap-2 pt-2">
+                                        <div class="h-8 w-20 bg-primary rounded-lg opacity-90"></div>
+                                        <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                                    </div>
+                                </div>
+                                <!-- Decorative overlay for style -->
+                                <div
+                                    class="absolute -right-10 -bottom-10 size-40 bg-gradient-to-tl from-primary/10 to-transparent rounded-full blur-2xl pointer-events-none">
+                                </div>
+                            </div>
+                            <!-- Quick Actions Summary -->
+                            <div class="bg-primary text-white rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                                <div class="relative z-10">
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <span class="material-symbols-outlined">auto_fix_high</span>
+                                        <h4 class="font-bold text-lg">Quick Actions</h4>
+                                    </div>
+                                    <ul class="space-y-3 text-sm font-medium">
+                                        <li class="flex items-center gap-3 opacity-90">
+                                            <span class="material-symbols-outlined text-[20px]">text_increase</span>
+                                            <span>Large Text enabled</span>
+                                        </li>
+                                        <li class="flex items-center gap-3 opacity-90">
+                                            <span class="material-symbols-outlined text-[20px]">contrast</span>
+                                            <span>High Contrast on</span>
+                                        </li>
+                                    </ul>
+                                    <button
+                                        class="mt-6 w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-bold transition-colors">
+                                        Undo Last Change
+                                    </button>
+                                </div>
+                                <div class="absolute top-0 right-0 p-8 opacity-10">
+                                    <span class="material-symbols-outlined text-9xl">accessibility</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

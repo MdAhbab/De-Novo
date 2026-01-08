@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>De-Novo Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#008c9e",
+                        "background-light": "#f9fafb",
+                        "background-dark": "#111827",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom accessibility focus ring */
+        *:focus-visible {
+            outline: 3px solid #f59e0b !important; /* Amber for high contrast */
+            outline-offset: 2px;
+        }
+        
+        /* Hide scrollbar for clean carousel */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-gray-100 min-h-screen flex flex-col overflow-x-hidden">
+<!-- Top Navigation -->
+<header class="w-full border-b border-[#e6f3f4] dark:border-gray-800 bg-white dark:bg-gray-900 px-10 py-4 flex items-center justify-between sticky top-0 z-50">
+<div class="flex items-center gap-4 text-[#0c1b1d] dark:text-white">
+<div class="size-8 text-primary">
+<span class="material-symbols-outlined text-4xl">diversity_1</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight">De-Novo</h2>
+</div>
+<div class="flex gap-4 items-center">
+<!-- Voice Narration Toggle -->
+<button aria-label="Toggle Voice Narration" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e6f3f4] dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-bold text-sm transition hover:bg-[#d0eef1] dark:hover:bg-gray-700">
+<span class="material-symbols-outlined text-primary">record_voice_over</span>
+<span>Voice Narration: On</span>
+</button>
+<button aria-label="Skip Tutorial" class="text-gray-500 dark:text-gray-400 font-bold text-sm hover:text-primary transition">
+                Skip Tutorial
+            </button>
+</div>
+</header>
+<main class="flex-grow flex flex-col items-center justify-center w-full max-w-[1280px] mx-auto px-6 py-8">
+<!-- Welcome Heading -->
+<section class="w-full max-w-[960px] mb-8 text-center md:text-left">
+<div class="flex flex-col gap-3">
+<h1 class="text-[#0c1b1d] dark:text-white text-4xl md:text-5xl font-black leading-tight tracking-[-0.033em]">Welcome to De-Novo</h1>
+<p class="text-[#4596a1] text-lg md:text-xl font-normal leading-normal max-w-2xl">Let's set up your experience to match your sensory needs before we begin.</p>
+</div>
+</section>
+<div class="w-full max-w-[960px] grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Accessibility Calibration (Always visible/first for screen readers) -->
+<aside class="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
+<!-- Calibration Card -->
+<div class="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-[#e6f3f4] dark:border-gray-800">
+<div class="flex items-center gap-2 mb-4 border-b border-[#e6f3f4] dark:border-gray-800 pb-2">
+<span class="material-symbols-outlined text-primary">accessibility_new</span>
+<h3 class="text-[#0c1b1d] dark:text-white text-lg font-bold">Calibration</h3>
+</div>
+<!-- Checklist items re-styled -->
+<div class="flex flex-col gap-4">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="w-5 h-5 rounded border-[#cde6ea] dark:border-gray-600 text-primary focus:ring-primary focus:ring-offset-2 dark:bg-gray-800" type="checkbox"/>
+<span class="text-base font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">Text-to-Speech (TTS)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-5 h-5 rounded border-[#cde6ea] dark:border-gray-600 text-primary focus:ring-primary focus:ring-offset-2 dark:bg-gray-800" type="checkbox"/>
+<span class="text-base font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">Speech-to-Text (STT)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-5 h-5 rounded border-[#cde6ea] dark:border-gray-600 text-primary focus:ring-primary focus:ring-offset-2 dark:bg-gray-800" type="checkbox"/>
+<span class="text-base font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">High Contrast Mode</span>
+</label>
+</div>
+<!-- Audio Test Button -->
+<div class="mt-6">
+<button class="w-full flex items-center justify-center gap-2 rounded-lg bg-[#e6f3f4] dark:bg-gray-800 hover:bg-[#d0eef1] dark:hover:bg-gray-700 text-[#0c1b1d] dark:text-white font-bold h-12 transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<span class="material-symbols-outlined">volume_up</span>
+<span>Test Audio Output</span>
+</button>
+</div>
+</div>
+<!-- Font Size Adjustment -->
+<div class="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-[#e6f3f4] dark:border-gray-800">
+<h3 class="text-[#0c1b1d] dark:text-white text-sm uppercase tracking-wide font-bold mb-4 opacity-70">Text Size</h3>
+<div class="flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-2">
+<button aria-label="Decrease Font Size" class="p-2 hover:bg-white dark:hover:bg-gray-700 rounded shadow-sm text-gray-500 dark:text-gray-400">
+<span class="material-symbols-outlined text-sm">text_decrease</span>
+</button>
+<div class="flex-1 px-2">
+<div class="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/2"></div>
+</div>
+</div>
+<button aria-label="Increase Font Size" class="p-2 hover:bg-white dark:hover:bg-gray-700 rounded shadow-sm text-gray-900 dark:text-white">
+<span class="material-symbols-outlined text-xl">text_increase</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Right Column: Interactive Feature Carousel -->
+<section class="lg:col-span-8 order-1 lg:order-2">
+<div class="relative w-full h-full min-h-[500px] bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-[#e6f3f4] dark:border-gray-800 overflow-hidden flex flex-col">
+<!-- Progress Bar -->
+<div class="absolute top-0 left-0 w-full h-1.5 bg-gray-100 dark:bg-gray-800 z-10">
+<div class="h-full bg-primary w-1/4 transition-all duration-500"></div>
+</div>
+<!-- Slide Content -->
+<div class="flex-1 flex flex-col">
+<!-- Image Area -->
+<div class="relative h-64 md:h-80 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden group">
+<img alt="Diverse group of people sitting in a circle communicating using sign language and technology" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A warm, brightly lit scene showing a diverse group of people interacting. One person is signing, another is looking at a tablet." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMX_q9_SJRAr0FGvYD5dVFIPHG9K1T6zDSE0ZvOlbtqSAosSf0xaHiK9stfhyag8R7jVwoGY6e5vSkDcdbqDELKCOaDZ0fxpFeRReJobg87DJ4ADZudFJNASk53d8dKaWKhY2cuywyquULCB8EQit23-xnVhmZo4tDU_wZ9NzxnR6j6ZDURQ34zij6gjXV9qSfnABlK9kxsUDvthMnp1Jx3Tlbegb0vdAFIp0_VCIHwoLOPNt0F2Sy9wlGzJh5cNuszXuFcYPNWJ8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
+<div class="bg-primary/90 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm mb-1 inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+                                    Step 1 of 4
+                                </div>
+</div>
+</div>
+<!-- Text Content -->
+<div class="flex-1 p-8 md:p-10 flex flex-col justify-between">
+<div>
+<h2 class="text-3xl font-black text-[#0c1b1d] dark:text-white mb-4">Communication without barriers.</h2>
+<p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                                    De-Novo bridges the gap between different sensory experiences. Whether you sign, speak, or type, our platform translates your preferred method into what your friend needs to receive.
+                                </p>
+</div>
+<!-- Navigation Controls -->
+<div class="flex items-center justify-between mt-8 pt-8 border-t border-gray-100 dark:border-gray-800">
+<div class="flex gap-2">
+<span class="block w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span class="block w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+<span class="block w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+<span class="block w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+</div>
+<button class="flex items-center justify-center gap-2 px-8 py-3 bg-primary hover:bg-[#007a8a] text-white rounded-xl font-bold text-lg transition-all shadow-md hover:shadow-lg focus:ring-4 focus:ring-primary/30">
+<span>Next Feature</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Slide Navigation Arrows (Desktop) -->
+<button class="hidden md:flex absolute top-1/2 left-4 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg items-center justify-center text-gray-800 dark:text-white hover:bg-white dark:hover:bg-gray-700 transition" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="hidden md:flex absolute top-1/2 right-4 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg items-center justify-center text-primary hover:bg-white dark:hover:bg-gray-700 transition">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</section>
+</div>
+<!-- Bottom CTA Strip -->
+<div class="w-full max-w-[960px] mt-12 flex flex-col md:flex-row items-center justify-between p-6 bg-[#e6f3f4] dark:bg-gray-800/50 rounded-2xl gap-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined">rocket_launch</span>
+</div>
+<div>
+<h4 class="font-bold text-[#0c1b1d] dark:text-white text-lg">Ready to explore on your own?</h4>
+<p class="text-sm text-gray-600 dark:text-gray-400">You can skip the tutorial and start your personalized tour.</p>
+</div>
+</div>
+<button class="whitespace-nowrap px-6 py-3 bg-white dark:bg-gray-700 border-2 border-primary text-primary dark:text-white font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition">
+                Take a Tour
+            </button>
+</div>
+</main>
+</body></html>

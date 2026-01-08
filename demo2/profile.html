@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>De-Novo Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#008c9e",
+                        "background-light": "#f9fafb",
+                        "background-dark": "#111827",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1f2937",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom accessibility focus styles */
+        *:focus-visible {
+            outline: 3px solid #008c9e;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Navbar -->
+<header class="sticky top-0 z-50 bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800">
+<div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-20">
+<!-- Logo & Nav -->
+<div class="flex items-center gap-12">
+<a class="flex items-center gap-3 text-primary hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined text-4xl">hearing_disabled</span>
+<span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">De-Novo</span>
+</a>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-bold text-slate-900 dark:text-white border-b-2 border-primary pb-0.5" href="#">Profile</a>
+<a class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">Messages</a>
+<a class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">Community</a>
+<a class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">Settings</a>
+</nav>
+</div>
+<!-- Search & Profile -->
+<div class="flex items-center gap-6">
+<div class="hidden sm:flex items-center bg-background-light dark:bg-slate-800 rounded-xl px-4 py-2.5 w-64 border border-transparent focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<span class="material-symbols-outlined text-primary">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full text-slate-900 dark:text-white placeholder-slate-400 ml-2" placeholder="Find people..." type="text"/>
+</div>
+<button class="relative group">
+<div class="w-10 h-10 rounded-full bg-cover bg-center border-2 border-slate-200 dark:border-slate-700 group-hover:border-primary transition-colors" data-alt="User profile thumbnail showing a smiling woman" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA07sfPhxrtl3JXxr10_qtChlBy9nu_vFqTpVgj5wAIcqg9MkUa62gFsoL7yoamOW6Mu40guTrkq4dt7Td_EPoJwu0tvc4idefWS3gor06C4CAH04YHVRbwj0UP5RyD8hgyxXbcSvhozaTeIwf0-Uq7Da0KLKqeKDDv1a58w5vbv_9gEYSDZvdyvkgEnWpUqt96fuhb2Mg6Zawy086d5ZHjKSVPazffmaW5oGeuGwOgspAGLyCPjhpTDMkWp1VIclTMvNYQ9jc_YDs');"></div>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-[1200px] mx-auto px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+<!-- Page Heading -->
+<div class="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+<div>
+<h1 class="text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white mb-2">My Profile</h1>
+<p class="text-primary text-lg font-medium max-w-2xl">Manage your identity, accessibility badges, and how others connect with you.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+<span>View Public</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Primary Info & Bio (8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-8">
+<!-- Profile Card -->
+<section class="bg-surface-light dark:bg-surface-dark rounded-3xl p-6 md:p-10 shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden group">
+<!-- Decorative Background Blob -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex flex-col md:flex-row gap-8 relative z-10">
+<!-- Avatar Section -->
+<div class="flex-shrink-0 relative group/avatar mx-auto md:mx-0">
+<div class="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white dark:border-slate-700 shadow-lg relative">
+<img alt="Profile picture of Alex M. looking confident" class="w-full h-full object-cover" data-alt="Profile picture of Alex M." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJUDvwpvoEQnVNywuYCSbL_bhFVoCdLnmAFnKvjJ2bVr4sPEvSvqLU0q3vYtGy6IsRNhClq9X7K6vMksm_8p_F1yeVDamwC3YgEl_r8s9TURP45jB4UgvO44vM-40_oEsykfKUdjDeM3qePUPG_aHy1ljJZQyvZt6XTMxw-JgpXRuAWMUF3fMx67-iFH5RpZSQDxMsTSVC9H-2KRrFUMKNAtUK4hFhDYVt9FNZk4vu3I_KGhfFY-iQLW6fcZhGO2nlQn6gcMcdVmc"/>
+<!-- Edit Overlay -->
+<button aria-label="Change profile photo" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity focus:opacity-100 cursor-pointer">
+<span class="material-symbols-outlined text-white text-4xl">photo_camera</span>
+</button>
+</div>
+<div class="absolute bottom-2 right-2 md:right-4">
+<div class="w-6 h-6 rounded-full bg-green-500 border-2 border-white dark:border-slate-800 flex items-center justify-center" title="Online">
+<span class="sr-only">Status: Online</span>
+</div>
+</div>
+</div>
+<!-- Info Section -->
+<div class="flex-1 flex flex-col justify-center text-center md:text-left">
+<div class="flex flex-col md:flex-row items-center md:items-start justify-between gap-4 mb-4">
+<div>
+<div class="flex items-center justify-center md:justify-start gap-3 mb-1">
+<h2 class="text-3xl font-bold text-slate-900 dark:text-white">Alex M.</h2>
+<button aria-label="Edit name" class="text-slate-400 hover:text-primary transition-colors p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+</div>
+<p class="text-slate-500 dark:text-slate-400 font-medium">@alex_inclusive_design</p>
+</div>
+<div class="flex items-center gap-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-sm font-bold">
+<span class="material-symbols-outlined text-lg fill-current">check_circle</span>
+<span>Online</span>
+</div>
+</div>
+<!-- Bio Input -->
+<div class="relative group/bio mb-6">
+<textarea aria-label="Edit Bio" class="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-xl p-4 text-slate-700 dark:text-slate-300 resize-none focus:ring-2 focus:ring-primary text-base leading-relaxed min-h-[120px]">Graphic designer passionate about inclusive tech. I prefer text-based communication and use screen readers occasionally, so please describe images when possible.</textarea>
+<div class="absolute bottom-3 right-3 opacity-0 group-hover/bio:opacity-100 focus-within:opacity-100 transition-opacity">
+<span class="text-xs font-bold text-slate-400">145/200</span>
+</div>
+</div>
+<!-- Accessibility Badges -->
+<div>
+<p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Accessibility &amp; Preferences</p>
+<div class="flex flex-wrap gap-3 justify-center md:justify-start">
+<div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors cursor-default">
+<span class="material-symbols-outlined text-[20px]">sign_language</span>
+<span class="font-bold text-sm">ASL Fluent</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors cursor-default">
+<span class="material-symbols-outlined text-[20px]">keyboard</span>
+<span class="font-bold text-sm">Text Preferred</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors cursor-default">
+<span class="material-symbols-outlined text-[20px]">contrast</span>
+<span class="font-bold text-sm">High Contrast</span>
+</div>
+<button aria-label="Add badge" class="flex items-center justify-center w-8 h-8 rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Activity Status Control -->
+<section class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6">
+<div class="flex items-start gap-4">
+<div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined text-2xl">schedule</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Activity Status</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Show others when you are available for real-time chat.</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-14 h-8 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-primary"></div>
+<span class="ml-3 text-sm font-bold text-slate-900 dark:text-white peer-checked:text-primary">Visible</span>
+</label>
+</section>
+<!-- Languages -->
+<section class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">translate</span>
+                             Languages Spoken
+                        </h3>
+<button class="text-sm font-bold text-primary hover:underline">Edit</button>
+</div>
+<div class="flex gap-4 text-slate-700 dark:text-slate-300">
+<div class="flex flex-col">
+<span class="font-bold">English</span>
+<span class="text-sm text-slate-500">Native (Written)</span>
+</div>
+<div class="w-px bg-slate-200 dark:bg-slate-700 h-10"></div>
+<div class="flex flex-col">
+<span class="font-bold">ASL</span>
+<span class="text-sm text-slate-500">Fluent</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Contact & Actions (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<!-- QR Code Card -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-800 text-center flex flex-col items-center">
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Connect Instantly</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-6">Let friends scan this to find you.</p>
+<div class="bg-white p-4 rounded-2xl shadow-inner border border-slate-100 mb-6">
+<img alt="QR Code linking to Alex M's profile" class="w-40 h-40 mix-blend-multiply opacity-90" data-alt="Black and white QR code pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9W_t8kh0SlwsGMI6YyyB22MLFlHpCGWBfjxESzqNdfGLi2CAm2Sw-KP_oCkEbFL8BPgHLtKfs_6exgMfv5lSBzVlyspQMVM4ZG0TBv0Hi_it9shxigUMZxW5vKDm4J7wQzGinM9xrZmHdK_QcdaxBTm4N8OO3Fe9-ilRzgzpzvdkO8A9b83xVRZyK2isZPgNHDtMyOAQ2hbmTD6V0-RkrCAG8QnFhT04J24am9RRHUTAVDAD243dSsOaI7ixX1WyPIj13PiiysT4"/>
+</div>
+<div class="flex gap-3 w-full">
+<button class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-[20px]">share</span>
+                            Share
+                        </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+                            Save
+                        </button>
+</div>
+</div>
+<!-- Contact Info -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">contact_page</span>
+                        Contact Info
+                    </h3>
+<ul class="space-y-4">
+<li class="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Email</p>
+<p class="text-sm font-semibold text-slate-900 dark:text-white truncate">alex.m@example.com</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+</li>
+<li class="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined">alternate_email</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Social</p>
+<p class="text-sm font-semibold text-slate-900 dark:text-white truncate">@alex_m_design</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined">open_in_new</span>
+</button>
+</li>
+</ul>
+</div>
+<!-- Danger / Account Actions -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Account Actions</h3>
+<div class="space-y-3">
+<button class="w-full flex items-center justify-between p-3 rounded-xl border border-transparent hover:bg-red-50 hover:border-red-100 dark:hover:bg-red-900/10 dark:hover:border-red-900/30 group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-red-500 transition-colors">block</span>
+<span class="font-bold text-slate-700 dark:text-slate-300 group-hover:text-red-600 dark:group-hover:text-red-400">Block User</span>
+</div>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-red-400 text-sm">arrow_forward_ios</span>
+</button>
+<button class="w-full flex items-center justify-between p-3 rounded-xl border border-transparent hover:bg-amber-50 hover:border-amber-100 dark:hover:bg-amber-900/10 dark:hover:border-amber-900/30 group transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-amber-500 transition-colors">flag</span>
+<span class="font-bold text-slate-700 dark:text-slate-300 group-hover:text-amber-600 dark:group-hover:text-amber-400">Report Profile</span>
+</div>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-amber-400 text-sm">arrow_forward_ios</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Simple Footer -->
+<footer class="mt-auto py-8 text-center border-t border-slate-200 dark:border-slate-800">
+<p class="text-slate-400 dark:text-slate-600 text-sm font-medium">© 2023 De-Novo. Designing for everyone.</p>
+</footer>
+</body></html>
