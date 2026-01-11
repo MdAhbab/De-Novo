@@ -1,8 +1,5 @@
 # De-Novo
 A platform to support disabled people.
-
-Structured Project Overview
-Here is the "proper" version, organised into a technical specification format suitable for a proposal or documentation.
 Project Name: Unified Social Platform for Accessible Communication
 1. Executive Summary We are developing a unified web platform designed specifically for individuals with disabilities (specifically those with hearing, speech, and visual impairments) who face barriers interacting in standard social environments. The goal is to provide a secure, inclusive social interface that facilitates connection and emotional well-being.
 2. Target Audience (Stakeholders)
