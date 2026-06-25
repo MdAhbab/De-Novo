@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccessibility } from '../../context/AccessibilityContext';
 import { useTheme } from '../../context/ThemeContext';
 import { ZoomIn, ZoomOut, Eye, MessageSquare, Moon, Sun, Monitor } from 'lucide-react';
