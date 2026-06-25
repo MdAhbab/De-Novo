@@ -1,0 +1,24 @@
+docs: add comprehensive full-stack audit (security, API contract, a11y, UX)
+
+Add audit.md: an end-to-end engineering, security, accessibility, and
+UX/UI review of the De-Novo platform (Django REST + Channels backend,
+React 19 + Vite + Tailwind frontend).
+
+Highlights (~70 findings, each with file:line refs and fixes):
+- Critical security: live Google API keys + a real personal credential
+  committed to git; "End-to-End Encryption" claimed but never wired
+  (messages stored/read as plaintext); webcam auto-starts without consent.
+- Systemic frontend/backend API contract drift (22 mismatched endpoints)
+  that breaks Mood Zone, Contacts, profile editing, quick phrases,
+  accessibility persistence, and the security screens.
+- Backend defects: security app 500s on non-existent User fields
+  (peeping_tom_detection/encryption_enabled), preset tts_speed vs tts_rate,
+  N+1 queries, dead/non-functional WebSocket layer, MySQL-vs-SQLite config.
+- Frontend: user.name undefined app-wide, several "demo-ware" pages with
+  hardcoded data and no handlers, no error boundary, fragile token refresh.
+- Accessibility: color-blind modes and high-contrast theme are no-ops,
+  icon-font read-aloud, modal focus traps, contrast failures.
+- Plus UX/premium-UI, performance, code-quality, and DevOps recommendations,
+  with a phased remediation roadmap and a fast-fix checklist.
+
+Audit only; no application code changed.

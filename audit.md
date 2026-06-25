@@ -23,8 +23,8 @@ The third class is **security & honesty**: live Google API keys are committed to
 
 | Severity | Count | Examples |
 |---|---|---|
-| 🔴 Critical | 8 | Committed API keys, false E2E claim, broken auth/profile contract, non-consensual camera |
-| 🟠 High | 17 | Mood/contacts/security endpoint mismatches, dead WebSocket layer, `user.name` undefined everywhere, DB config mismatch |
+| 🔴 Critical | 8 | Committed API keys + a real personal credential, false E2E claim, broken auth/profile contract, non-consensual camera |
+| 🟠 High | 19 | Mood/contacts/security endpoint mismatches, security app 500s on wrong field names, dead WebSocket layer, `user.name` undefined everywhere, DB config mismatch |
 | 🟡 Medium | 23 | Hardcoded UI data, a11y regressions, toast/alert UX, settings not persisted, no error boundaries |
 | 🟢 Low / Polish | 20+ | Copy bugs, invalid Tailwind classes, `class` vs `className`, dead code, `© 2023` |
 
@@ -73,8 +73,8 @@ de-novo-backend/ (Django 4.2, DRF, SimpleJWT, Channels/Daphne)
 ## 3. 🔴 Critical Security & Privacy Findings
 
 ### SEC-01 — Live Google API keys committed to the repository 🔴
-**Where:** `de-novo-backend/.env:12` (`GOOGLE_API_KEY=AIza…`), `.env:15` (`GCP_API_KEY=AIza…`); `.env` is git-tracked (confirmed via `git ls-files`). `settings.py:99` also hardcodes a default DB password `'12345678'`.
-**Problem:** Real, working secrets are in version control. Anyone with repo access (or anyone who ever cloned it) can bill your Google Cloud project (Speech, TTS, Vision, NLP, Gemini) and exfiltrate data.
+**Where:** `de-novo-backend/.env:12` (`GOOGLE_API_KEY=AIza…`), `.env:15` (`GCP_API_KEY=AIza…`); `.env` is git-tracked (confirmed via `git ls-files`). `settings.py:99` also hardcodes a default DB password `'12345678'`. **Additionally `reset_password.py:7-9` commits a real personal email (`ahbab.md@gmail.com`) and resets it to a known password (`!12345678`)**, and `create_test_users.py` commits test credentials (`test12345`, `demo12345`).
+**Problem:** Real, working secrets *and a real personal account credential* are in version control. Anyone with repo access (or anyone who ever cloned it) can bill your Google Cloud project (Speech, TTS, Vision, NLP, Gemini), log into that personal account, and exfiltrate data.
 **Impact:** Financial (unbounded quota abuse), data exposure, and the keys must be treated as permanently compromised.
 **Fix:**
 1. **Immediately revoke/rotate** both keys in Google Cloud Console.
@@ -212,6 +212,21 @@ The frontend `utils/api.js` and the Django `urls.py`/serializers have drifted ap
 **Where:** `SendMessageView` and the WS `save_message` call `sentiment_analyzer.analyze()` → blocking HTTPS round-trip to Google NLP **inside** the send path (`chat/views.py:189`, `consumers.py:229`). TTS/STT/Vision are likewise synchronous.
 **Impact:** Every message send waits on an external API (added latency, failure coupling). `requests` has **no timeout** set anywhere in `gcp_client.py` → a slow Google response hangs the worker.
 **Fix:** Add explicit timeouts to all `requests.post` calls; move sentiment to async (Celery — which is already in requirements — or a background thread), or compute it client-side; degrade gracefully.
+
+### BE-12 — Security app crashes (HTTP 500) on three endpoints due to wrong field names 🟠
+**Where:** `apps/security/views.py` references `user.peeping_tom_detection` (`:304,326,372,385`) and `user.encryption_enabled` (`:305,328,371,381`), but the `User` model defines neither — it has **`peeping_tom_enabled`** and **no encryption flag at all** (`users/models.py:68`; confirmed via grep). Affected views: `SecuritySettingsView.get/patch`, `SecuritySummaryView`, and `_calculate_security_score`.
+**Impact:** `GET /security/settings/`, `GET /security/summary/`, and the security-score logic raise `AttributeError` → **500** for every user. The entire "Security Settings/Summary" surface is dead on the server even before the frontend URL mismatches (`API-17..19`).
+**Fix:** Rename to `peeping_tom_enabled`; add an `encryption_enabled` boolean to the `User` model (and migration) or derive it from `bool(user.public_key)`. Add a serializer/test so this can't regress.
+
+### BE-13 — `ApplyPresetView` writes a non-existent `tts_speed` attribute (silent no-op) 🟡
+**Where:** `accessibility/views.py:106-107` does `user.tts_speed = settings['tts_speed']`, and `fixtures/accessibility_presets.json` uses the key `tts_speed`. The model field is **`tts_rate`** (`users/models.py:59`).
+**Impact:** Django lets you set the stray attribute, so it doesn't crash, but `user.save()` never persists it — applying a preset silently fails to change TTS speed. The fixture key is also wrong.
+**Fix:** Use `tts_rate` consistently in the view and the fixtures.
+
+### BE-14 — Privacy alerts can persist raw camera images server-side 🟡
+**Where:** `security/models.py:30-33` — `PrivacyAlert.image_data` stores a **base64 image of the user's surroundings**.
+**Impact:** Compounds `SEC-04`: captured frames of the user (and bystanders) could be written to the database with no stated retention/encryption, for an emotion/face-surveillance feature.
+**Fix:** Don't store raw frames; if an evidence thumbnail is truly needed, store on-device only or store a hash/metadata, with explicit consent and a retention/purge policy.
 
 ### BE-11 — `create_test_users.py`, `reset_password.py`, `setup.py` and `db.sqlite3` committed 🟢
 **Where:** repo root of backend.
@@ -444,7 +459,7 @@ Given the user base (deaf, mute, blind, and otherwise disabled users — a prote
 6. `FE-01` Fix user identity (`display_name`) end-to-end.
 7. `FE-04` Error boundary + safe response parsing + central error→toast (`UX-01`).
 8. `FE-05` Single-flight token refresh.
-9. `BE-06` Install JWT blacklist app; fix logout (`API-01`).
+9. `BE-06` Install JWT blacklist app; fix logout (`API-01`). `BE-12/13` Fix security-app field names (stop the 500s) and the `tts_speed`/`tts_rate` mismatch.
 10. `FE-10..14` Wire Dashboard/Mood/Settings/Profile/Accessibility to real data + handlers; build Contacts.
 
 ### Phase 2 — Make it trustworthy & accessible (1–2 weeks)
@@ -474,5 +489,8 @@ Given the user base (deaf, mute, blind, and otherwise disabled users — a prote
 - [ ] Remove `lh3.googleusercontent.com/aida-public/*` placeholder images.
 - [ ] Remove fake "Voice Login"/"Biometric"/"Download App"/carousel arrows or implement them.
 - [ ] Add `aria-hidden="true"` to all decorative `material-symbols-outlined` spans.
+- [ ] `security/views.py` `user.peeping_tom_detection`/`user.encryption_enabled` → real fields (BE-12) — fixes 3× HTTP 500.
+- [ ] `accessibility/views.py:107` + fixtures `tts_speed` → `tts_rate` (BE-13).
+- [ ] Delete `reset_password.py` (real personal credential) and remove from git history (SEC-01).
 
 *End of audit.*
