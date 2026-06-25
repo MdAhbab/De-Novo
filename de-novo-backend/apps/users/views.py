@@ -1,10 +1,22 @@
 """
 Views for User app.
+Fixes applied:
+  - API-01: Logout reads 'refresh_token' field (was 'refresh')
+  - API-02: Profile update uses /profile/update/ (routed correctly)
+  - API-03: Add contact uses /contacts/add/ with {username}
+  - API-04: Remove contact uses /contacts/<id>/remove/
+  - API-05: Block/unblock at /contacts/<id>/block/ and /unblock/
+  - SEC-06: Rate throttling on login/register
+  - SEC-07: UserSearch excludes email, no disability_type in results
+  - SEC-08: print() replaced with logging
+  - BE-08: UserProfileView uses PublicUserProfileSerializer for others
 """
 
+import logging
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.throttling import AnonRateThrottle, ScopedRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import logout
 from django.db.models import Q
@@ -14,6 +26,7 @@ from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
+    PublicUserProfileSerializer,
     UserUpdateSerializer,
     AccessibilitySettingsSerializer,
     UserContactSerializer,
@@ -23,6 +36,16 @@ from .serializers import (
     PublicKeySerializer,
 )
 
+logger = logging.getLogger(__name__)
+
+
+class LoginRateThrottle(AnonRateThrottle):
+    scope = 'login'
+
+
+class RegisterRateThrottle(AnonRateThrottle):
+    scope = 'register'
+
 
 class RegisterView(generics.CreateAPIView):
     """User registration endpoint."""
@@ -30,6 +53,7 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [permissions.AllowAny]
     serializer_class = UserRegistrationSerializer
+    throttle_classes = [RegisterRateThrottle]
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -56,6 +80,7 @@ class LoginView(APIView):
     """User login endpoint."""
     
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [LoginRateThrottle]
     
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
@@ -82,11 +107,16 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
-    """User logout endpoint."""
+    """User logout endpoint.
+    
+    API-01: Reads 'refresh_token' field (frontend was sending 'refresh').
+    Fix: accept both field names for compatibility during transition.
+    """
     
     def post(self, request):
         try:
-            refresh_token = request.data.get('refresh_token')
+            # API-01: Accept 'refresh_token' (backend canonical) and 'refresh' (frontend compat)
+            refresh_token = request.data.get('refresh_token') or request.data.get('refresh')
             if refresh_token:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
@@ -99,10 +129,11 @@ class LogoutView(APIView):
                 'message': 'Logout successful'
             })
         except Exception as e:
+            logger.warning(f"Logout error for user {request.user.id}: {type(e).__name__}")
             return Response({
                 'success': False,
                 'error': {
-                    'message': str(e)
+                    'message': 'Logout failed'
                 }
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -114,19 +145,44 @@ class ProfileView(generics.RetrieveAPIView):
     
     def get_object(self):
         return self.request.user
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response({
+            'success': True,
+            'data': serializer.data
+        })
 
 
 class UserProfileView(generics.RetrieveAPIView):
-    """Get another user's profile by ID."""
+    """Get another user's profile by ID.
+    
+    BE-08: Returns PublicUserProfileSerializer (no PII/health data) for other users.
+    """
     
     queryset = User.objects.all()
-    serializer_class = UserProfileSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'user_id'
+    
+    def get_serializer_class(self):
+        # Return full profile for self, public profile for others
+        user_id = self.kwargs.get('user_id')
+        if self.request.user.id == user_id:
+            return UserProfileSerializer
+        return PublicUserProfileSerializer
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response({
+            'success': True,
+            'data': serializer.data
+        })
 
 
 class UpdateProfileView(generics.UpdateAPIView):
-    """Update current user's profile."""
+    """Update current user's profile (API-02: path /profile/update/)."""
     
     serializer_class = UserUpdateSerializer
     
@@ -175,7 +231,7 @@ class AvatarUploadView(APIView):
 
 
 class AccessibilitySettingsView(generics.RetrieveUpdateAPIView):
-    """Get/Update accessibility settings."""
+    """Get/Update accessibility settings (API-06)."""
     
     serializer_class = AccessibilitySettingsSerializer
     
@@ -225,7 +281,7 @@ class ContactListView(generics.ListAPIView):
 
 
 class AddContactView(APIView):
-    """Add a new contact."""
+    """Add a new contact (API-03: POST /contacts/add/ with {username})."""
     
     def post(self, request):
         serializer = AddContactSerializer(data=request.data)
@@ -234,7 +290,13 @@ class AddContactView(APIView):
         username = serializer.validated_data['username']
         nickname = serializer.validated_data.get('nickname', '')
         
-        contact_user = User.objects.get(username=username)
+        try:
+            contact_user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': {'message': 'User not found'}
+            }, status=status.HTTP_404_NOT_FOUND)
         
         if contact_user == request.user:
             return Response({
@@ -266,7 +328,7 @@ class AddContactView(APIView):
 
 
 class RemoveContactView(APIView):
-    """Remove a contact."""
+    """Remove a contact (API-04: DELETE /contacts/<id>/remove/)."""
     
     def delete(self, request, contact_id):
         try:
@@ -290,7 +352,7 @@ class RemoveContactView(APIView):
 
 
 class BlockUserView(APIView):
-    """Block a user."""
+    """Block a user (API-05: POST /contacts/<id>/block/)."""
     
     def post(self, request, contact_id):
         try:
@@ -306,7 +368,7 @@ class BlockUserView(APIView):
             
             reason = request.data.get('reason', '')
             
-            blocked, created = BlockedUser.objects.get_or_create(
+            BlockedUser.objects.get_or_create(
                 blocker=request.user,
                 blocked=blocked_user,
                 defaults={'reason': reason}
@@ -332,7 +394,7 @@ class BlockUserView(APIView):
 
 
 class UnblockUserView(APIView):
-    """Unblock a user."""
+    """Unblock a user (API-05: POST /contacts/<id>/unblock/)."""
     
     def post(self, request, contact_id):
         try:
@@ -351,28 +413,34 @@ class UnblockUserView(APIView):
                 'message': 'User unblocked successfully'
             })
         except Exception as e:
+            logger.warning(f"Unblock error: {type(e).__name__}")
             return Response({
                 'success': False,
                 'error': {
-                    'message': str(e)
+                    'message': 'Failed to unblock user'
                 }
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserSearchView(generics.ListAPIView):
-    """Search for users."""
+    """Search for users.
+    
+    SEC-07: Search by username/name only (no email substring enumeration).
+    disability_type is NOT returned in results.
+    """
     
     serializer_class = UserSearchSerializer
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
         query = self.request.query_params.get('q', '')
+        # Require at least 2 chars to prevent broad enumeration
         if len(query) < 2:
             return User.objects.none()
         
+        # SEC-07: Only search by username/name (NOT email) to prevent enumeration
         return User.objects.filter(
             Q(username__icontains=query) |
-            Q(email__icontains=query) |
             Q(first_name__icontains=query) |
             Q(last_name__icontains=query)
         ).exclude(id=self.request.user.id)[:20]

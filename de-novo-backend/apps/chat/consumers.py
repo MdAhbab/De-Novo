@@ -3,9 +3,12 @@ WebSocket consumers for real-time chat.
 """
 
 import json
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -238,7 +241,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'emotion': message.emotion
             }
         except Exception as e:
-            print(f"Sentiment analysis error: {e}")
+            logger.warning(f"Sentiment analysis error in consumer: {type(e).__name__}")
         
         return {
             'id': str(message.id),

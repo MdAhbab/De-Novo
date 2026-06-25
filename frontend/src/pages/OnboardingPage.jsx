@@ -1,50 +1,58 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useAccessibility } from '../context/AccessibilityContext';
+import { api } from '../utils/api';
+import { toast } from '../utils/toast';
 
 const OnboardingPage = () => {
     const navigate = useNavigate();
-    const { settings, updateSettings } = useAccessibility();
+    const { user } = useAuth();
+    // FE-02: Use updateSetting (singular) — not updateSettings
+    const { settings, updateSetting, increaseFontSize, decreaseFontSize, fontSize } = useAccessibility();
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [completing, setCompleting] = useState(false);
+
+    const handleComplete = async () => {
+        setCompleting(true);
+        try {
+            await api.users.completeOnboarding();
+        } catch {} finally {
+            setCompleting(false);
+            navigate('/dashboard');
+        }
+    };
 
     const slides = [
         {
             title: "Communication without barriers.",
             desc: "De-Novo bridges the gap between different sensory experiences. Whether you sign, speak, or type, our platform translates your preferred method into what your friend needs to receive.",
-            img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAMX_q9_SJRAr0FGvYD5dVFIPHG9K1T6zDSE0ZvOlbtqSAosSf0xaHiK9stfhyag8R7jVwoGY6e5vSkDcdbqDELKCOaDZ0fxpFeRReJobg87DJ4ADZudFJNASk53d8dKaWKhY2cuywyquULCB8EQit23-xnVhmZo4tDU_wZ9NzxnR6j6ZDURQ34zij6gjXV9qSfnABlK9kxsUDvthMnp1Jx3Tlbegb0vdAFIp0_VCIHwoLOPNt0F2Sy9wlGzJh5cNuszXuFcYPNWJ8",
+            img: "https://placehold.co/600x400/008c9e/ffffff?text=Communication+Without+Barriers",
             step: "Step 1 of 4"
         },
         {
             title: "Your Sensory Profile.",
             desc: "Customize how you perceive content. Adjust colors, contrast, and audio settings to match your personal sensory needs for a comfortable experience.",
-            img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDc86v5lBouPLxXOoHo_s2p7JcbT9efcdT5AkDfMB7fwRxHa-txRuM1p9wagcq4SafC8sVmdG9qjwSs1okbWgKDpLu7o_nQgEP3Tp9sGhFlq8czLKgrsy8YnpD3SnD8ZvnLxan6msKZ5GNg81_Jzw2d1Uc25f4pjgsdtb6be9a11E9rIjHzhIJv0IPDYOObkgtQwT3lfPC2sxZ1QgwdhhwbEVux0238_D-vanQkngmxxUfUOqafph0xdtr-9pqxVQRh5s92lKWeLso", // Using placeholder/reused image for now as unique one wasn't in snippet
+            img: "https://placehold.co/600x400/008c9e/ffffff?text=Sensory+Profile",
             step: "Step 2 of 4"
         },
         {
             title: "Real-time Translation.",
             desc: "Speak and we'll type. Sign and we'll voice. Type and we'll sign. Our AI-powered translation ensures smooth conversation flow.",
-            img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAMX_q9_SJRAr0FGvYD5dVFIPHG9K1T6zDSE0ZvOlbtqSAosSf0xaHiK9stfhyag8R7jVwoGY6e5vSkDcdbqDELKCOaDZ0fxpFeRReJobg87DJ4ADZudFJNASk53d8dKaWKhY2cuywyquULCB8EQit23-xnVhmZo4tDU_wZ9NzxnR6j6ZDURQ34zij6gjXV9qSfnABlK9kxsUDvthMnp1Jx3Tlbegb0vdAFIp0_VCIHwoLOPNt0F2Sy9wlGzJh5cNuszXuFcYPNWJ8", // Reused
+            img: "https://placehold.co/600x400/008c9e/ffffff?text=Real-time+Translation",
             step: "Step 3 of 4"
         },
         {
             title: "Safe Community.",
             desc: "Join communities that understand you. Connect with others in a safe, moderated environment designed for inclusivity.",
-            img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDc86v5lBouPLxXOoHo_s2p7JcbT9efcdT5AkDfMB7fwRxHa-txRuM1p9wagcq4SafC8sVmdG9qjwSs1okbWgKDpLu7o_nQgEP3Tp9sGhFlq8czLKgrsy8YnpD3SnD8ZvnLxan6msKZ5GNg81_Jzw2d1Uc25f4pjgsdtb6be9a11E9rIjHzhIJv0IPDYOObkgtQwT3lfPC2sxZ1QgwdhhwbEVux0238_D-vanQkngmxxUfUOqafph0xdtr-9pqxVQRh5s92lKWeLso", // Reused
+            img: "https://placehold.co/600x400/008c9e/ffffff?text=Safe+Community",
             step: "Step 4 of 4"
         }
     ];
 
-    const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
-    };
-
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-    };
-
-    const handleSkip = () => {
-        navigate('/dashboard');
-    };
+    const nextSlide = () => { setCurrentSlide((prev) => (prev + 1) % slides.length); };
+    const prevSlide = () => { setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length); };
+    const handleSkip = () => navigate('/dashboard');
 
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-gray-100 min-h-screen flex flex-col overflow-x-hidden transition-colors duration-300">
@@ -52,7 +60,7 @@ const OnboardingPage = () => {
             <header className="w-full border-b border-[#e6f3f4] dark:border-gray-800 bg-white dark:bg-gray-900 px-10 py-4 flex items-center justify-between sticky top-0 z-50 transition-colors duration-300">
                 <div className="flex items-center gap-4 text-[#0c1b1d] dark:text-white">
                     <div className="size-8 text-primary">
-                        <span className="material-symbols-outlined text-4xl">diversity_1</span>
+                        <span className="material-symbols-outlined text-4xl" aria-hidden="true">diversity_1</span>
                     </div>
                     <h2 className="text-xl font-bold leading-tight tracking-tight">De-Novo</h2>
                 </div>
@@ -62,13 +70,13 @@ const OnboardingPage = () => {
                         aria-label="Toggle Voice Narration"
                         className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e6f3f4] dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-bold text-sm transition hover:bg-[#d0eef1] dark:hover:bg-gray-700 active:scale-95"
                     >
-                        <span className="material-symbols-outlined text-primary">record_voice_over</span>
+                        <span className="material-symbols-outlined text-primary" aria-hidden="true">record_voice_over</span>
                         <span>Voice Narration: On</span>
                     </button>
                     <button
                         onClick={handleSkip}
                         aria-label="Skip Tutorial"
-                        className="text-gray-500 dark:text-gray-400 font-bold text-sm hover:text-primary transition focus:outline-none focus:ring-2 focus:ring-primary rounded-lg px-2 py-1"
+                        className="text-gray-500 dark:text-gray-500 font-bold text-sm hover:text-primary transition focus:outline-none focus:ring-2 focus:ring-primary rounded-lg px-2 py-1"
                     >
                         Skip Tutorial
                     </button>
@@ -90,7 +98,7 @@ const OnboardingPage = () => {
                         {/* Calibration Card */}
                         <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-[#e6f3f4] dark:border-gray-800 transition-colors duration-300">
                             <div className="flex items-center gap-2 mb-4 border-b border-[#e6f3f4] dark:border-gray-800 pb-2">
-                                <span className="material-symbols-outlined text-primary">accessibility_new</span>
+                                <span className="material-symbols-outlined text-primary" aria-hidden="true">accessibility_new</span>
                                 <h3 className="text-[#0c1b1d] dark:text-white text-lg font-bold">Calibration</h3>
                             </div>
                             {/* Checklist items */}
@@ -98,7 +106,9 @@ const OnboardingPage = () => {
                                 <label className="flex items-center gap-3 cursor-pointer group">
                                     <input
                                         type="checkbox"
-                                        defaultChecked
+                                        id="onboard-tts"
+                                        checked={settings.ttsEnabled}
+                                        onChange={e => updateSetting('ttsEnabled', e.target.checked)}
                                         className="w-5 h-5 rounded border-[#cde6ea] dark:border-gray-600 text-primary focus:ring-primary focus:ring-offset-2 dark:bg-gray-800"
                                     />
                                     <span className="text-base font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">Text-to-Speech (TTS)</span>
@@ -106,6 +116,9 @@ const OnboardingPage = () => {
                                 <label className="flex items-center gap-3 cursor-pointer group">
                                     <input
                                         type="checkbox"
+                                        id="onboard-stt"
+                                        checked={settings.sttEnabled}
+                                        onChange={e => updateSetting('sttEnabled', e.target.checked)}
                                         className="w-5 h-5 rounded border-[#cde6ea] dark:border-gray-600 text-primary focus:ring-primary focus:ring-offset-2 dark:bg-gray-800"
                                     />
                                     <span className="text-base font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">Speech-to-Text (STT)</span>
@@ -113,6 +126,9 @@ const OnboardingPage = () => {
                                 <label className="flex items-center gap-3 cursor-pointer group">
                                     <input
                                         type="checkbox"
+                                        id="onboard-contrast"
+                                        checked={settings.highContrast}
+                                        onChange={e => updateSetting('highContrast', e.target.checked)}
                                         className="w-5 h-5 rounded border-[#cde6ea] dark:border-gray-600 text-primary focus:ring-primary focus:ring-offset-2 dark:bg-gray-800"
                                     />
                                     <span className="text-base font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">High Contrast Mode</span>
@@ -121,7 +137,7 @@ const OnboardingPage = () => {
                             {/* Audio Test Button */}
                             <div className="mt-6">
                                 <button className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#e6f3f4] dark:bg-gray-800 hover:bg-[#d0eef1] dark:hover:bg-gray-700 text-[#0c1b1d] dark:text-white font-bold h-12 transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                                    <span className="material-symbols-outlined">volume_up</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">volume_up</span>
                                     <span>Test Audio Output</span>
                                 </button>
                             </div>
@@ -131,16 +147,25 @@ const OnboardingPage = () => {
                         <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-[#e6f3f4] dark:border-gray-800 transition-colors duration-300">
                             <h3 className="text-[#0c1b1d] dark:text-white text-sm uppercase tracking-wide font-bold mb-4 opacity-70">Text Size</h3>
                             <div className="flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-2 transition-colors duration-300">
-                                <button aria-label="Decrease Font Size" className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded shadow-sm text-gray-500 dark:text-gray-400 transition-colors">
-                                    <span className="material-symbols-outlined text-sm">text_decrease</span>
+                                <button
+                                    aria-label={`Decrease Font Size (current: ${fontSize}px)`}
+                                    onClick={decreaseFontSize}
+                                    className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded shadow-sm text-gray-500 dark:text-gray-500 transition-colors"
+                                >
+                                    <span className="material-symbols-outlined text-sm" aria-hidden="true">text_decrease</span>
                                 </button>
                                 <div className="flex-1 px-2">
                                     <div className="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                        <div className="h-full bg-primary w-1/2"></div>
+                                        <div className="h-full bg-primary transition-all" style={{ width: `${((fontSize - 12) / 20) * 100}%` }} />
                                     </div>
+                                    <p className="text-center text-xs mt-1 text-gray-500">{fontSize}px</p>
                                 </div>
-                                <button aria-label="Increase Font Size" className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded shadow-sm text-gray-900 dark:text-white transition-colors">
-                                    <span className="material-symbols-outlined text-xl">text_increase</span>
+                                <button
+                                    aria-label={`Increase Font Size (current: ${fontSize}px)`}
+                                    onClick={increaseFontSize}
+                                    className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded shadow-sm text-gray-900 dark:text-white transition-colors"
+                                >
+                                    <span className="material-symbols-outlined text-xl" aria-hidden="true">text_increase</span>
                                 </button>
                             </div>
                         </div>
@@ -168,7 +193,7 @@ const OnboardingPage = () => {
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
                                         <div className="bg-primary/90 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm mb-1 inline-flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[16px]">verified</span>
+                                            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">verified</span>
                                             {slides[currentSlide].step}
                                         </div>
                                     </div>
@@ -176,7 +201,8 @@ const OnboardingPage = () => {
 
                                 {/* Text Content */}
                                 <div className="flex-1 p-8 md:p-10 flex flex-col justify-between">
-                                    <div className="animate-fade-in key={currentSlide}">
+                                {/* FE-17: key goes on the React element, not as JSX attribute on a div */}
+                                <div key={currentSlide} className="animate-fade-in">
                                         <h2 className="text-3xl font-black text-[#0c1b1d] dark:text-white mb-4">{slides[currentSlide].title}</h2>
                                         <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
                                             {slides[currentSlide].desc}
@@ -196,11 +222,18 @@ const OnboardingPage = () => {
                                             ))}
                                         </div>
                                         <button
-                                            onClick={currentSlide === slides.length - 1 ? handleSkip : nextSlide}
-                                            className="flex items-center justify-center gap-2 px-8 py-3 bg-primary hover:bg-[#007a8a] text-white rounded-xl font-bold text-lg transition-all shadow-md hover:shadow-lg focus:ring-4 focus:ring-primary/30"
+                                            onClick={currentSlide === slides.length - 1 ? handleComplete : nextSlide}
+                                            disabled={completing}
+                                            className="flex items-center justify-center gap-2 px-8 py-3 bg-primary hover:bg-[#007a8a] text-white rounded-xl font-bold text-lg transition-all shadow-md hover:shadow-lg focus:ring-4 focus:ring-primary/30 disabled:opacity-70"
                                         >
-                                            <span>{currentSlide === slides.length - 1 ? 'Get Started' : 'Next Feature'}</span>
-                                            <span className="material-symbols-outlined">arrow_forward</span>
+                                            {completing ? (
+                                                <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>
+                                            ) : (
+                                                <>
+                                                    <span>{currentSlide === slides.length - 1 ? 'Get Started' : 'Next Feature'}</span>
+                                                    <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                                                </>
+                                            )}
                                         </button>
                                     </div>
                                 </div>
@@ -211,13 +244,13 @@ const OnboardingPage = () => {
                                 onClick={prevSlide}
                                 className="hidden md:flex absolute top-1/2 left-4 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg items-center justify-center text-gray-800 dark:text-white hover:bg-white dark:hover:bg-gray-700 transition"
                             >
-                                <span className="material-symbols-outlined">chevron_left</span>
+                                <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
                             </button>
                             <button
                                 onClick={nextSlide}
                                 className="hidden md:flex absolute top-1/2 right-4 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg items-center justify-center text-primary hover:bg-white dark:hover:bg-gray-700 transition"
                             >
-                                <span className="material-symbols-outlined">chevron_right</span>
+                                <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
                             </button>
                         </div>
                     </section>
@@ -227,11 +260,11 @@ const OnboardingPage = () => {
                 <div className="w-full max-w-[960px] mt-12 flex flex-col md:flex-row items-center justify-between p-6 bg-[#e6f3f4] dark:bg-gray-800/50 rounded-2xl gap-4 transition-colors duration-300">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-primary shadow-sm">
-                            <span className="material-symbols-outlined">rocket_launch</span>
+                            <span className="material-symbols-outlined" aria-hidden="true">rocket_launch</span>
                         </div>
                         <div>
                             <h4 className="font-bold text-[#0c1b1d] dark:text-white text-lg">Ready to explore on your own?</h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">You can skip the tutorial and start your personalized tour.</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-500">You can skip the tutorial and start your personalized tour.</p>
                         </div>
                     </div>
                     <button

@@ -20,12 +20,10 @@ export const AuthProvider = ({ children }) => {
             if (response.success) {
                 setUser(response.data);
             } else {
-                // Token invalid, clear it
                 clearTokens();
                 setUser(null);
             }
         } catch (err) {
-            console.error('Failed to fetch user profile:', err);
             clearTokens();
             setUser(null);
         } finally {
@@ -36,6 +34,16 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         fetchUserProfile();
     }, [fetchUserProfile]);
+
+    // FE-05: Listen for the single-flight refresh failure broadcast
+    useEffect(() => {
+        const handleForceLogout = () => {
+            setUser(null);
+            clearTokens();
+        };
+        window.addEventListener('auth:logout', handleForceLogout);
+        return () => window.removeEventListener('auth:logout', handleForceLogout);
+    }, []);
 
     const login = async (email, password) => {
         setError(null);
@@ -52,7 +60,7 @@ export const AuthProvider = ({ children }) => {
                 setError(errorMsg);
                 return { success: false, error: errorMsg };
             }
-        } catch (err) {
+        } catch {
             const errorMsg = 'Network error. Please try again.';
             setError(errorMsg);
             return { success: false, error: errorMsg };
@@ -66,15 +74,25 @@ export const AuthProvider = ({ children }) => {
         setLoading(true);
         
         try {
-            // Map frontend fields to backend expected fields
+            // API-21: Split name into first_name/last_name
             const registerData = {
                 email: data.email,
                 username: data.username || data.email.split('@')[0],
                 password: data.password,
                 password_confirm: data.password_confirm || data.password,
-                display_name: data.name || data.display_name,
-                disability_type: data.disability_type || 'none'
+                disability_type: data.disability_type || 'none',
             };
+
+            // Handle full name → first/last split
+            const fullName = data.name || data.display_name || '';
+            if (fullName) {
+                const parts = fullName.trim().split(' ');
+                registerData.first_name = parts[0] || '';
+                registerData.last_name  = parts.slice(1).join(' ') || '';
+            } else {
+                registerData.first_name = data.first_name || '';
+                registerData.last_name  = data.last_name  || '';
+            }
             
             const response = await api.auth.register(registerData);
             
@@ -82,17 +100,16 @@ export const AuthProvider = ({ children }) => {
                 setUser(response.data.user);
                 return { success: true, user: response.data.user };
             } else {
-                // Handle validation errors
                 let errorMsg = 'Registration failed';
-                if (response.email) errorMsg = response.email[0];
-                else if (response.username) errorMsg = response.username[0];
-                else if (response.password) errorMsg = response.password[0];
-                else if (response.error?.message) errorMsg = response.error.message;
+                if (response.email)               errorMsg = response.email[0];
+                else if (response.username)        errorMsg = response.username[0];
+                else if (response.password)        errorMsg = response.password[0];
+                else if (response.error?.message)  errorMsg = response.error.message;
                 
                 setError(errorMsg);
                 return { success: false, error: errorMsg, details: response };
             }
-        } catch (err) {
+        } catch {
             const errorMsg = 'Network error. Please try again.';
             setError(errorMsg);
             return { success: false, error: errorMsg };
@@ -104,8 +121,6 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             await api.auth.logout();
-        } catch (err) {
-            console.error('Logout error:', err);
         } finally {
             setUser(null);
             clearTokens();
@@ -120,12 +135,20 @@ export const AuthProvider = ({ children }) => {
                 return { success: true };
             }
             return { success: false, error: response.error?.message || 'Update failed' };
-        } catch (err) {
+        } catch {
             return { success: false, error: 'Network error' };
         }
     };
 
     const clearError = () => setError(null);
+
+    // Helper: get display name from user object
+    const getUserDisplayName = (u = user) => {
+        if (!u) return '';
+        return u.display_name || u.name ||
+               (u.first_name && u.last_name ? `${u.first_name} ${u.last_name}` : '') ||
+               u.first_name || u.username || '';
+    };
 
     return (
         <AuthContext.Provider value={{ 
@@ -138,7 +161,8 @@ export const AuthProvider = ({ children }) => {
             clearError,
             updateProfile,
             refreshProfile: fetchUserProfile,
-            isAuthenticated: !!user
+            isAuthenticated: !!user,
+            getUserDisplayName,
         }}>
             {children}
         </AuthContext.Provider>

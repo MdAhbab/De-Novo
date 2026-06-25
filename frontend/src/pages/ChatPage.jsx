@@ -65,6 +65,33 @@ const ChatPage = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    // A11Y-05: Modal Focus Traps & Escape Key handling
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                if (showNewChatModal) {
+                    setShowNewChatModal(false);
+                    setUserSearchQuery('');
+                    setUserSearchResults([]);
+                }
+                if (showCameraModal) {
+                    closeCameraModal();
+                }
+            }
+        };
+
+        if (showNewChatModal || showCameraModal) {
+            document.addEventListener('keydown', handleKeyDown);
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = 'unset';
+        };
+    }, [showNewChatModal, showCameraModal]);
+
     // Apply transcript from speech-to-text
     useEffect(() => {
         if (transcript) {
@@ -304,7 +331,7 @@ const ChatPage = () => {
 
         return (
             <span className={`flex items-center gap-1 ${colors[sentiment] || colors.neutral} px-1.5 py-0.5 rounded-md text-[10px] font-bold border`}>
-                <span className="material-symbols-outlined text-[12px]">{icons[sentiment] || icons.neutral}</span>
+                <span className="material-symbols-outlined text-[12px]" aria-hidden="true">{icons[sentiment] || icons.neutral}</span>
                 <span className="capitalize">{sentiment || 'neutral'}</span>
             </span>
         );
@@ -318,7 +345,7 @@ const ChatPage = () => {
                     <div className="flex items-center gap-3">
                         <Link to="/" className="flex items-center gap-3">
                             <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                                <span className="material-symbols-outlined text-2xl">forum</span>
+                                <span className="material-symbols-outlined text-2xl" aria-hidden="true">forum</span>
                             </div>
                             <h1 className="text-2xl font-bold tracking-tight dark:text-white">De-Novo</h1>
                         </Link>
@@ -329,24 +356,24 @@ const ChatPage = () => {
                             className="size-10 rounded-full bg-primary text-white hover:bg-primary-dark flex items-center justify-center transition-colors shadow-md"
                             title="New Chat"
                         >
-                            <span className="material-symbols-outlined">add</span>
+                            <span className="material-symbols-outlined" aria-hidden="true">add</span>
                         </button>
                         <button 
                             onClick={() => fetchConversations()}
-                            className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors text-slate-500 dark:text-slate-400"
+                            className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors text-slate-500 dark:text-slate-500"
                         >
-                            <span className="material-symbols-outlined">refresh</span>
+                            <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
                         </button>
                     </div>
                 </div>
                 {/* Search */}
                 <div className="px-6 pb-4">
                     <div className="relative group">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                            <span className="material-symbols-outlined">search</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors">
+                            <span className="material-symbols-outlined" aria-hidden="true">search</span>
                         </span>
                         <input 
-                            className="w-full h-12 bg-slate-50 dark:bg-slate-800 border-none rounded-xl pl-10 pr-4 text-base focus:ring-2 focus:ring-primary/50 transition-all dark:text-white placeholder:text-slate-400" 
+                            className="w-full h-12 bg-slate-50 dark:bg-slate-800 border-none rounded-xl pl-10 pr-4 text-base focus:ring-2 focus:ring-primary/50 transition-all dark:text-white placeholder:text-slate-500" 
                             placeholder="Search contacts..." 
                             type="text"
                             value={searchQuery}
@@ -382,8 +409,8 @@ const ChatPage = () => {
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         </div>
                     ) : filteredConversations.length === 0 ? (
-                        <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                            <span className="material-symbols-outlined text-4xl mb-2 block">chat_bubble_outline</span>
+                        <div className="text-center py-8 text-slate-500 dark:text-slate-500">
+                            <span className="material-symbols-outlined text-4xl mb-2 block" aria-hidden="true">chat_bubble_outline</span>
                             <p className="text-sm font-medium">No conversations yet</p>
                             <p className="text-xs">Start chatting with someone!</p>
                         </div>
@@ -420,12 +447,12 @@ const ChatPage = () => {
                                         <h3 className={`font-bold truncate ${activeConversation?.id === conv.id ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white'}`}>
                                             {conv.name}
                                         </h3>
-                                        <span className={`text-xs ${activeConversation?.id === conv.id ? 'font-semibold text-primary' : 'text-slate-400'}`}>
+                                        <span className={`text-xs ${activeConversation?.id === conv.id ? 'font-semibold text-primary' : 'text-slate-500'}`}>
                                             {formatTime(conv.lastMessageTime)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <p className={`text-sm truncate ${activeConversation?.id === conv.id ? 'text-primary font-medium' : 'text-slate-500 dark:text-slate-400'}`}>
+                                        <p className={`text-sm truncate ${activeConversation?.id === conv.id ? 'text-primary font-medium' : 'text-slate-500 dark:text-slate-500'}`}>
                                             {conv.lastMessage || 'No messages yet'}
                                         </p>
                                         {conv.unread > 0 && (
@@ -445,8 +472,8 @@ const ChatPage = () => {
             <main className={`${!showMobileList || activeConversation ? 'flex' : 'hidden'} md:flex flex-1 flex-col h-full relative bg-background-light dark:bg-background-dark`}>
                 {!activeConversation ? (
                     // No conversation selected
-                    <div className="flex-1 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
-                        <span className="material-symbols-outlined text-6xl mb-4">chat</span>
+                    <div className="flex-1 flex flex-col items-center justify-center text-slate-500 dark:text-slate-500">
+                        <span className="material-symbols-outlined text-6xl mb-4" aria-hidden="true">chat</span>
                         <h2 className="text-xl font-bold mb-2">Welcome to De-Novo Chat</h2>
                         <p className="text-sm">Select a conversation to start messaging</p>
                     </div>
@@ -459,7 +486,7 @@ const ChatPage = () => {
                                     onClick={() => setShowMobileList(true)}
                                     className="md:hidden p-2 -ml-2 text-slate-600 dark:text-slate-300"
                                 >
-                                    <span className="material-symbols-outlined">arrow_back</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
                                 </button>
                                 <div className="relative">
                                     {activeConversation.avatar ? (
@@ -485,7 +512,7 @@ const ChatPage = () => {
                                                 conversationMood.overall_mood === 'negative' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                                                 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                                             }`}>
-                                                <span className="material-symbols-outlined text-sm">
+                                                <span className="material-symbols-outlined text-sm" aria-hidden="true">
                                                     {conversationMood.overall_mood === 'positive' ? 'sentiment_satisfied' :
                                                      conversationMood.overall_mood === 'negative' ? 'sentiment_dissatisfied' : 'sentiment_neutral'}
                                                 </span>
@@ -496,7 +523,7 @@ const ChatPage = () => {
                                     <div className="flex items-center gap-1.5 mt-1">
                                         {activeConversation.isEncrypted && (
                                             <span className="flex items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-full px-1.5 py-0.5">
-                                                <span className="material-symbols-outlined text-[10px] text-primary mr-1">verified_user</span>
+                                                <span className="material-symbols-outlined text-[10px] text-primary mr-1" aria-hidden="true">verified_user</span>
                                                 <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">E2E Encrypted</span>
                                             </span>
                                         )}
@@ -506,7 +533,7 @@ const ChatPage = () => {
                                             className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors ${
                                                 pollingEnabled 
                                                     ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-                                                    : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
+                                                    : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-500'
                                             }`}
                                             title={pollingEnabled ? 'Live updates enabled - Click to disable' : 'Live updates disabled - Click to enable'}
                                         >
@@ -526,16 +553,16 @@ const ChatPage = () => {
                                     className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors"
                                     title="Refresh messages"
                                 >
-                                    <span className="material-symbols-outlined">refresh</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
                                 </button>
                                 <button aria-label="Start Voice Call" className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors">
-                                    <span className="material-symbols-outlined">call</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">call</span>
                                 </button>
                                 <button aria-label="Start Video Call" className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors">
-                                    <span className="material-symbols-outlined">videocam</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">videocam</span>
                                 </button>
                                 <button aria-label="Chat Info" className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors md:mr-2">
-                                    <span className="material-symbols-outlined">info</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">info</span>
                                 </button>
                             </div>
                         </header>
@@ -544,7 +571,7 @@ const ChatPage = () => {
                         {conversationMood && messages.length >= 2 && (
                             <div className="px-4 py-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">AI Mood Analysis:</span>
+                                    <span className="text-xs font-medium text-slate-500 dark:text-slate-500">AI Mood Analysis:</span>
                                     <div className="flex items-center gap-2">
                                         {/* Mood Score Bar */}
                                         <div className="w-24 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -563,8 +590,8 @@ const ChatPage = () => {
                                     </div>
                                 </div>
                                 {analyzingMood && (
-                                    <span className="text-xs text-slate-400 flex items-center gap-1">
-                                        <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                                    <span className="text-xs text-slate-500 flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-sm animate-spin" aria-hidden="true">progress_activity</span>
                                         Analyzing...
                                     </span>
                                 )}
@@ -574,8 +601,8 @@ const ChatPage = () => {
                         {/* Message Stream */}
                         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar" style={{ backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiM5NGEzYjgiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')" }}>
                             {messages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-full text-slate-500 dark:text-slate-400">
-                                    <span className="material-symbols-outlined text-4xl mb-2">chat_bubble_outline</span>
+                                <div className="flex flex-col items-center justify-center h-full text-slate-500 dark:text-slate-500">
+                                    <span className="material-symbols-outlined text-4xl mb-2" aria-hidden="true">chat_bubble_outline</span>
                                     <p className="text-sm">No messages yet. Start the conversation!</p>
                                 </div>
                             ) : (
@@ -616,8 +643,8 @@ const ChatPage = () => {
                                                     <div className={`relative ${isOutgoing ? 'bg-primary text-white rounded-br-none' : `bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700 rounded-bl-none text-slate-800 dark:text-slate-100 ${getSentimentBorderClass(msg.sentiment)}`} p-4 rounded-2xl shadow-soft`}>
                                                         <p className="text-base leading-relaxed">{msg.text}</p>
                                                         {msg.pending && (
-                                                            <span className="absolute -bottom-1 -right-1 text-xs text-slate-400">
-                                                                <span className="material-symbols-outlined text-sm animate-pulse">schedule</span>
+                                                            <span className="absolute -bottom-1 -right-1 text-xs text-slate-500">
+                                                                <span className="material-symbols-outlined text-sm animate-pulse" aria-hidden="true">schedule</span>
                                                             </span>
                                                         )}
                                                         {/* TTS Button */}
@@ -626,21 +653,21 @@ const ChatPage = () => {
                                                             aria-label="Listen to message" 
                                                             className={`absolute ${isOutgoing ? '-left-10' : '-right-10'} top-2 opacity-0 group-hover/msg:opacity-100 transition-opacity p-1.5 bg-white dark:bg-slate-700 shadow-sm rounded-full ${speaking ? 'text-red-500' : 'text-primary'} hover:bg-slate-50 dark:hover:bg-slate-600`}
                                                         >
-                                                            <span className="material-symbols-outlined text-lg">{speaking ? 'stop' : 'volume_up'}</span>
+                                                            <span className="material-symbols-outlined text-lg" aria-hidden="true">{speaking ? 'stop' : 'volume_up'}</span>
                                                         </button>
                                                     </div>
                                                     {/* Metadata Row */}
                                                     <div className={`flex items-center gap-2 ${isOutgoing ? 'pr-1' : 'pl-1'}`}>
-                                                        <span className="text-xs text-slate-400">{formatTime(msg.timestamp)}</span>
+                                                        <span className="text-xs text-slate-500">{formatTime(msg.timestamp)}</span>
                                                         {msg.sentiment && getSentimentBadge(msg.sentiment)}
                                                         {isOutgoing && msg.isRead && (
-                                                            <span className="material-symbols-outlined text-[14px] text-primary">done_all</span>
+                                                            <span className="material-symbols-outlined text-[14px] text-primary" aria-hidden="true">done_all</span>
                                                         )}
                                                     </div>
                                                 </div>
                                                 
                                                 {isOutgoing && (
-                                                    <div className="size-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 text-xs font-bold mb-1">
+                                                    <div className="size-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-500 text-xs font-bold mb-1">
                                                         ME
                                                     </div>
                                                 )}
@@ -658,17 +685,17 @@ const ChatPage = () => {
                                 {/* Action Tools */}
                                 <div className="flex gap-2 pb-1">
                                     <button aria-label="Add Attachment" className="size-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-primary dark:hover:text-primary hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center">
-                                        <span className="material-symbols-outlined">add_circle</span>
+                                        <span className="material-symbols-outlined" aria-hidden="true">add_circle</span>
                                     </button>
                                     <button 
                                         onClick={openCameraModal}
                                         aria-label="Visual AI Camera" 
                                         className="size-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-primary dark:hover:text-primary hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center"
                                     >
-                                        <span className="material-symbols-outlined">photo_camera</span>
+                                        <span className="material-symbols-outlined" aria-hidden="true">photo_camera</span>
                                     </button>
                                     <button aria-label="Emoji Picker" className="size-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-primary dark:hover:text-primary hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hidden md:flex items-center justify-center">
-                                        <span className="material-symbols-outlined">sentiment_satisfied</span>
+                                        <span className="material-symbols-outlined" aria-hidden="true">sentiment_satisfied</span>
                                     </button>
                                 </div>
                                 {/* Input Field Wrapper */}
@@ -676,20 +703,20 @@ const ChatPage = () => {
                                     <div className="flex items-center px-4 py-3 gap-2">
                                         <textarea 
                                             ref={textareaRef}
-                                            className="bg-transparent border-none w-full resize-none p-0 focus:ring-0 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 max-h-32 custom-scrollbar leading-relaxed" 
+                                            className="bg-transparent border-none w-full resize-none p-0 focus:ring-0 text-slate-800 dark:text-slate-100 placeholder:text-slate-500 max-h-32 custom-scrollbar leading-relaxed" 
                                             placeholder="Type a message..." 
                                             rows="1"
                                             value={inputText}
                                             onChange={handleTextareaChange}
-                                            onKeyPress={handleKeyPress}
+                                            onKeyDown={handleKeyPress}
                                         />
                                         {/* Speech-to-Text Button */}
                                         <button 
                                             onClick={toggleVoiceInput}
                                             aria-label="Use Speech to Text" 
-                                            className={`transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-slate-400 hover:text-primary'}`}
+                                            className={`transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-slate-500 hover:text-primary'}`}
                                         >
-                                            <span className="material-symbols-outlined">{isListening ? 'mic' : 'mic'}</span>
+                                            <span className="material-symbols-outlined" aria-hidden="true">{isListening ? 'mic' : 'mic'}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -702,18 +729,18 @@ const ChatPage = () => {
                                         className="h-11 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary-dark shadow-md hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <span>Send</span>
-                                        <span className="material-symbols-outlined text-[18px]">send</span>
+                                        <span className="material-symbols-outlined text-[18px]" aria-hidden="true">send</span>
                                     </button>
                                 </div>
                             </div>
                             {/* Accessible Helper Text */}
                             <div className="max-w-5xl mx-auto mt-2 flex justify-between px-1">
-                                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
                                     {isListening ? '🎤 Listening...' : 'Press Enter to send'}
                                 </p>
                                 <div className="flex gap-4">
-                                    <p className="text-[10px] text-slate-400 flex items-center gap-1 cursor-pointer hover:text-primary">
-                                        <span className="material-symbols-outlined text-[12px]">keyboard</span>
+                                    <p className="text-[10px] text-slate-500 flex items-center gap-1 cursor-pointer hover:text-primary">
+                                        <span className="material-symbols-outlined text-[12px]" aria-hidden="true">keyboard</span>
                                         Shortcuts
                                     </p>
                                 </div>
@@ -726,30 +753,36 @@ const ChatPage = () => {
             {/* New Chat Modal */}
             {showNewChatModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                    <div 
+                        role="dialog" 
+                        aria-modal="true" 
+                        aria-labelledby="new-chat-title"
+                        className="bg-white dark:bg-surface-dark rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+                    >
                         {/* Modal Header */}
                         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white">New Chat</h2>
+                            <h2 id="new-chat-title" className="text-xl font-bold text-slate-900 dark:text-white">New Chat</h2>
                             <button 
                                 onClick={() => {
                                     setShowNewChatModal(false);
                                     setUserSearchQuery('');
                                     setUserSearchResults([]);
                                 }}
+                                aria-label="Close modal"
                                 className="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors text-slate-500"
                             >
-                                <span className="material-symbols-outlined">close</span>
+                                <span className="material-symbols-outlined" aria-hidden="true">close</span>
                             </button>
                         </div>
                         
                         {/* Search Input */}
                         <div className="p-6 pb-4">
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                                    <span className="material-symbols-outlined">search</span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                                    <span className="material-symbols-outlined" aria-hidden="true">search</span>
                                 </span>
                                 <input 
-                                    className="w-full h-12 bg-slate-50 dark:bg-slate-800 border-none rounded-xl pl-10 pr-4 text-base focus:ring-2 focus:ring-primary/50 transition-all dark:text-white placeholder:text-slate-400" 
+                                    className="w-full h-12 bg-slate-50 dark:bg-slate-800 border-none rounded-xl pl-10 pr-4 text-base focus:ring-2 focus:ring-primary/50 transition-all dark:text-white placeholder:text-slate-500" 
                                     placeholder="Search users by name or email..." 
                                     type="text"
                                     value={userSearchQuery}
@@ -791,23 +824,23 @@ const ChatPage = () => {
                                                 <h3 className="font-bold text-slate-700 dark:text-slate-200 truncate">
                                                     {targetUser.display_name || targetUser.username}
                                                 </h3>
-                                                <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                                                <p className="text-sm text-slate-500 dark:text-slate-500 truncate">
                                                     @{targetUser.username}
                                                 </p>
                                             </div>
-                                            <span className="material-symbols-outlined text-primary">chat</span>
+                                            <span className="material-symbols-outlined text-primary" aria-hidden="true">chat</span>
                                         </button>
                                     ))}
                                 </div>
                             ) : userSearchQuery.length >= 2 ? (
-                                <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                                    <span className="material-symbols-outlined text-4xl mb-2 block">person_search</span>
+                                <div className="text-center py-8 text-slate-500 dark:text-slate-500">
+                                    <span className="material-symbols-outlined text-4xl mb-2 block" aria-hidden="true">person_search</span>
                                     <p className="text-sm font-medium">No users found</p>
                                     <p className="text-xs">Try a different search term</p>
                                 </div>
                             ) : (
-                                <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                                    <span className="material-symbols-outlined text-4xl mb-2 block">group_add</span>
+                                <div className="text-center py-8 text-slate-500 dark:text-slate-500">
+                                    <span className="material-symbols-outlined text-4xl mb-2 block" aria-hidden="true">group_add</span>
                                     <p className="text-sm font-medium">Search for users</p>
                                     <p className="text-xs">Type at least 2 characters to search</p>
                                 </div>
@@ -820,18 +853,24 @@ const ChatPage = () => {
             {/* Camera Modal for Visual AI */}
             {showCameraModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+                    <div 
+                        role="dialog" 
+                        aria-modal="true" 
+                        aria-labelledby="camera-modal-title"
+                        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+                    >
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
                             <div className="flex items-center gap-3">
-                                <span className="material-symbols-outlined text-primary">photo_camera</span>
-                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Visual AI Analysis</h2>
+                                <span className="material-symbols-outlined text-primary" aria-hidden="true">photo_camera</span>
+                                <h2 id="camera-modal-title" className="text-lg font-bold text-slate-800 dark:text-slate-100">Visual AI Analysis</h2>
                             </div>
                             <button 
                                 onClick={closeCameraModal}
+                                aria-label="Close modal"
                                 className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                             >
-                                <span className="material-symbols-outlined text-slate-500">close</span>
+                                <span className="material-symbols-outlined text-slate-500" aria-hidden="true">close</span>
                             </button>
                         </div>
 
@@ -867,22 +906,22 @@ const ChatPage = () => {
                             {visualAnalysis && (
                                 <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
                                     <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-primary text-lg">analytics</span>
+                                        <span className="material-symbols-outlined text-primary text-lg" aria-hidden="true">analytics</span>
                                         Analysis Results
                                     </h3>
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-sm text-slate-600 dark:text-slate-400">Faces Detected:</span>
+                                            <span className="text-sm text-slate-600 dark:text-slate-500">Faces Detected:</span>
                                             <span className="font-bold text-slate-800 dark:text-slate-100">{visualAnalysis.face_count || 0}</span>
                                         </div>
                                         {visualAnalysis.privacy_alert && (
                                             <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 p-2 rounded-lg">
-                                                <span className="material-symbols-outlined text-lg">warning</span>
+                                                <span className="material-symbols-outlined text-lg" aria-hidden="true">warning</span>
                                                 <span className="text-sm font-medium">Privacy Alert: Multiple faces detected!</span>
                                             </div>
                                         )}
                                         {visualAnalysis.message && (
-                                            <p className="text-sm text-slate-600 dark:text-slate-400">{visualAnalysis.message}</p>
+                                            <p className="text-sm text-slate-600 dark:text-slate-500">{visualAnalysis.message}</p>
                                         )}
                                     </div>
                                 </div>
@@ -892,7 +931,7 @@ const ChatPage = () => {
                             {visualAnalysis?.error && (
                                 <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/30 rounded-xl">
                                     <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                                        <span className="material-symbols-outlined">error</span>
+                                        <span className="material-symbols-outlined" aria-hidden="true">error</span>
                                         <span className="text-sm font-medium">{visualAnalysis.error}</span>
                                     </div>
                                 </div>
@@ -906,7 +945,7 @@ const ChatPage = () => {
                                     onClick={capturePhoto}
                                     className="flex-1 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
                                 >
-                                    <span className="material-symbols-outlined">camera</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">camera</span>
                                     Capture Photo
                                 </button>
                             ) : (
@@ -915,7 +954,7 @@ const ChatPage = () => {
                                         onClick={retakePhoto}
                                         className="flex-1 py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2"
                                     >
-                                        <span className="material-symbols-outlined">refresh</span>
+                                        <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
                                         Retake
                                     </button>
                                     <button
@@ -925,12 +964,12 @@ const ChatPage = () => {
                                     >
                                         {analyzingVisual ? (
                                             <>
-                                                <span className="material-symbols-outlined animate-spin">progress_activity</span>
+                                                <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>
                                                 Analyzing...
                                             </>
                                         ) : (
                                             <>
-                                                <span className="material-symbols-outlined">psychology</span>
+                                                <span className="material-symbols-outlined" aria-hidden="true">psychology</span>
                                                 Analyze
                                             </>
                                         )}

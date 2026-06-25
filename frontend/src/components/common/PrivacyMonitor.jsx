@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 
 const EMOTION_LIKELIHOODS = {
     'VERY_UNLIKELY': 0,
@@ -11,6 +12,7 @@ const EMOTION_LIKELIHOODS = {
 };
 
 const PrivacyMonitor = ({ children }) => {
+    const { user } = useAuth();
     const [isMonitoring, setIsMonitoring] = useState(false);
     const [faceCount, setFaceCount] = useState(0);
     const [isBlurred, setIsBlurred] = useState(false);
@@ -19,6 +21,11 @@ const PrivacyMonitor = ({ children }) => {
     const [cameraError, setCameraError] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [hasPermission, setHasPermission] = useState(null);
+    // SEC-04: Camera defaults OFF; only shows if user has opted in
+    const [showConsentModal, setShowConsentModal] = useState(false);
+    const [userConsented, setUserConsented] = useState(() =>
+        localStorage.getItem('privacy_monitor_consent') === 'true'
+    );
     
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -127,14 +134,34 @@ const PrivacyMonitor = ({ children }) => {
         }
     }, []);
     
-    // Auto-start monitoring on mount
+    // SEC-04: Auto-start ONLY if user has explicitly consented AND backend setting is enabled
     useEffect(() => {
-        startMonitoring();
-        
-        return () => {
-            stopMonitoring();
-        };
-    }, []);
+        const backendEnabled = user?.peeping_tom_enabled === true;
+        if (userConsented && backendEnabled) {
+            startMonitoring();
+        }
+        return () => { stopMonitoring(); };
+    }, [userConsented, user?.peeping_tom_enabled]);
+
+    const handleConsentAccept = () => {
+        localStorage.setItem('privacy_monitor_consent', 'true');
+        setUserConsented(true);
+        setShowConsentModal(false);
+    };
+
+    const handleConsentDecline = () => {
+        localStorage.setItem('privacy_monitor_consent', 'false');
+        setUserConsented(false);
+        setShowConsentModal(false);
+    };
+
+    const handleEnableMonitor = () => {
+        if (!userConsented) {
+            setShowConsentModal(true);
+        } else {
+            startMonitoring();
+        }
+    };
     
     // Get dominant emotion
     const getDominantEmotion = () => {
@@ -154,11 +181,50 @@ const PrivacyMonitor = ({ children }) => {
     
     return (
         <div className="relative">
+            {/* SEC-04: Camera consent modal */}
+            {showConsentModal && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="consent-title"
+                    className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                >
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-8 space-y-5">
+                        <div className="flex items-center gap-3">
+                            <span className="material-symbols-outlined text-4xl text-primary" aria-hidden="true">videocam</span>
+                            <h2 id="consent-title" className="text-xl font-bold text-gray-900 dark:text-white">
+                                Enable Peeping Tom Protection?
+                            </h2>
+                        </div>
+                        <div className="space-y-3 text-sm text-gray-600 dark:text-gray-500">
+                            <p><strong>What it does:</strong> Activates your camera to count faces near your screen and blurs content if others are detected.</p>
+                            <p><strong>What is captured:</strong> Short video frames are analyzed for face detection. Emotion data may be processed via Google Vision API.</p>
+                            <p><strong>Retention:</strong> Frames are not stored. Analysis results are stored locally.</p>
+                            <p className="text-amber-600 dark:text-amber-400 font-medium">You can turn this off at any time in Settings → Privacy.</p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleConsentDecline}
+                                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                No Thanks
+                            </button>
+                            <button
+                                onClick={handleConsentAccept}
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-dark transition-colors"
+                            >
+                                Enable Protection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Blur Overlay when privacy breach detected */}
             {isBlurred && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-xl">
                     <div className="text-center p-8 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md mx-4">
-                        <span className="material-symbols-outlined text-6xl text-red-500 mb-4 block animate-pulse">
+                        <span className="material-symbols-outlined text-6xl text-red-500 mb-4 block animate-pulse" aria-hidden="true">
                             visibility_off
                         </span>
                         <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">
@@ -168,11 +234,11 @@ const PrivacyMonitor = ({ children }) => {
                             <span className="font-bold text-red-500">{faceCount} people</span> detected near your screen.
                             Content is blurred for your privacy.
                         </p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="text-sm text-slate-500 dark:text-slate-500">
                             The screen will automatically unblur when fewer people are detected.
                         </p>
                         <div className="mt-6 flex items-center justify-center gap-2 text-amber-600 dark:text-amber-400">
-                            <span className="material-symbols-outlined animate-spin">progress_activity</span>
+                            <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>
                             <span className="text-sm font-medium">Monitoring...</span>
                         </div>
                     </div>
@@ -190,7 +256,7 @@ const PrivacyMonitor = ({ children }) => {
                         onClick={() => setShowMiniCam(!showMiniCam)}
                         className="absolute -top-2 -left-2 z-10 size-8 rounded-full bg-primary text-white shadow-lg flex items-center justify-center hover:bg-primary-dark transition-colors"
                     >
-                        <span className="material-symbols-outlined text-sm">
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">
                             {showMiniCam ? 'chevron_right' : 'chevron_left'}
                         </span>
                     </button>
@@ -204,7 +270,7 @@ const PrivacyMonitor = ({ children }) => {
                                     <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Privacy Monitor</span>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-sm text-slate-500">person</span>
+                                    <span className="material-symbols-outlined text-sm text-slate-500" aria-hidden="true">person</span>
                                     <span className={`text-xs font-bold ${faceCount > 3 ? 'text-red-500' : faceCount > 1 ? 'text-amber-500' : 'text-green-500'}`}>
                                         {faceCount}
                                     </span>
@@ -227,7 +293,7 @@ const PrivacyMonitor = ({ children }) => {
                                     faceCount > 1 ? 'bg-amber-500 text-white' : 
                                     'bg-green-500 text-white'
                                 }`}>
-                                    <span className="material-symbols-outlined text-sm">face</span>
+                                    <span className="material-symbols-outlined text-sm" aria-hidden="true">face</span>
                                     {faceCount}
                                 </div>
                                 
@@ -252,7 +318,7 @@ const PrivacyMonitor = ({ children }) => {
                                     
                                     {/* Joy */}
                                     <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-sm text-emerald-500">sentiment_very_satisfied</span>
+                                        <span className="material-symbols-outlined text-sm text-emerald-500" aria-hidden="true">sentiment_very_satisfied</span>
                                         <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                             <div 
                                                 className="h-full bg-emerald-500 transition-all duration-500 rounded-full"
@@ -264,7 +330,7 @@ const PrivacyMonitor = ({ children }) => {
                                     
                                     {/* Sorrow */}
                                     <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-sm text-blue-500">sentiment_dissatisfied</span>
+                                        <span className="material-symbols-outlined text-sm text-blue-500" aria-hidden="true">sentiment_dissatisfied</span>
                                         <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                             <div 
                                                 className="h-full bg-blue-500 transition-all duration-500 rounded-full"
@@ -276,7 +342,7 @@ const PrivacyMonitor = ({ children }) => {
                                     
                                     {/* Anger */}
                                     <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-sm text-red-500">sentiment_extremely_dissatisfied</span>
+                                        <span className="material-symbols-outlined text-sm text-red-500" aria-hidden="true">sentiment_extremely_dissatisfied</span>
                                         <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                             <div 
                                                 className="h-full bg-red-500 transition-all duration-500 rounded-full"
@@ -288,7 +354,7 @@ const PrivacyMonitor = ({ children }) => {
                                     
                                     {/* Surprise */}
                                     <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-sm text-amber-500">mood</span>
+                                        <span className="material-symbols-outlined text-sm text-amber-500" aria-hidden="true">mood</span>
                                         <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                             <div 
                                                 className="h-full bg-amber-500 transition-all duration-500 rounded-full"
@@ -329,7 +395,7 @@ const PrivacyMonitor = ({ children }) => {
                             faceCount > 1 ? 'bg-amber-500' : 
                             'bg-green-500'
                         }`}>
-                            <span className="material-symbols-outlined text-white">
+                            <span className="material-symbols-outlined text-white" aria-hidden="true">
                                 {faceCount > 3 ? 'visibility_off' : 'videocam'}
                             </span>
                         </div>
@@ -342,7 +408,7 @@ const PrivacyMonitor = ({ children }) => {
                 <div className="fixed bottom-4 right-4 z-50 max-w-sm">
                     <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 shadow-lg">
                         <div className="flex items-start gap-3">
-                            <span className="material-symbols-outlined text-amber-500">warning</span>
+                            <span className="material-symbols-outlined text-amber-500" aria-hidden="true">warning</span>
                             <div className="flex-1">
                                 <p className="text-sm text-amber-700 dark:text-amber-300">{cameraError}</p>
                                 <button
@@ -356,7 +422,7 @@ const PrivacyMonitor = ({ children }) => {
                                 onClick={() => setCameraError(null)}
                                 className="text-amber-500 hover:text-amber-600"
                             >
-                                <span className="material-symbols-outlined text-sm">close</span>
+                                <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                             </button>
                         </div>
                     </div>

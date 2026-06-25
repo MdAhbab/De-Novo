@@ -45,7 +45,7 @@ const LoginPage = () => {
     const displayError = localError || authError;
 
     return (
-        <div className="h-screen w-full flex bg-background-light dark:bg-background-dark font-display overflow-hidden">
+        <div className="min-h-screen w-full flex bg-background-light dark:bg-background-dark font-display">
             {/* Left Side - Visual & Branding */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary items-center justify-center p-12">
                 {/* Abstract Background Elements */}
@@ -57,7 +57,7 @@ const LoginPage = () => {
                 <div className="relative z-20 text-white max-w-lg">
                     <div className="mb-8 flex items-center gap-3">
                         <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-lg">
-                            <span className="material-symbols-outlined text-3xl">diversity_3</span>
+                            <span className="material-symbols-outlined text-3xl" aria-hidden="true">diversity_3</span>
                         </div>
                         <h1 className="text-3xl font-bold tracking-tight">De-Novo</h1>
                     </div>
@@ -72,7 +72,7 @@ const LoginPage = () => {
                             <div className="flex -space-x-3">
                                 {[1, 2, 3].map((i) => (
                                     <div key={i} className="w-10 h-10 rounded-full border-2 border-primary bg-slate-200 flex items-center justify-center text-xs font-bold text-primary-dark">
-                                        <span className="material-symbols-outlined text-sm">person</span>
+                                        <span className="material-symbols-outlined text-sm" aria-hidden="true">person</span>
                                     </div>
                                 ))}
                             </div>
@@ -90,7 +90,7 @@ const LoginPage = () => {
                 {/* Mobile Header (only visible on small screens) */}
                 <div className="lg:hidden w-full flex justify-between items-center mb-6">
                     <div className="flex items-center gap-2 text-primary">
-                        <span className="material-symbols-outlined text-3xl">diversity_3</span>
+                        <span className="material-symbols-outlined text-3xl" aria-hidden="true">diversity_3</span>
                         <span className="text-xl font-bold">De-Novo</span>
                     </div>
                 </div>
@@ -98,36 +98,17 @@ const LoginPage = () => {
                 <div className="w-full max-w-md space-y-5">
                     <div className="text-center lg:text-left">
                         <h2 className="text-3xl font-black text-text-main dark:text-white mb-1">Welcome Back</h2>
-                        <p className="text-text-muted dark:text-gray-400 text-sm">Please enter your details to sign in.</p>
+                        <p className="text-text-muted dark:text-gray-500 text-sm">Please enter your details to sign in.</p>
                     </div>
 
-                    {/* Quick Login Options */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <button className="flex flex-col items-center justify-center p-3 border border-slate-200 dark:border-gray-700 rounded-xl hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all group">
-                            <span className="material-symbols-outlined text-2xl text-slate-400 group-hover:text-primary mb-1 transition-colors">mic</span>
-                            <span className="text-xs font-bold text-slate-600 dark:text-gray-300">Voice Login</span>
-                        </button>
-                        <button className="flex flex-col items-center justify-center p-3 border border-slate-200 dark:border-gray-700 rounded-xl hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all group">
-                            <span className="material-symbols-outlined text-2xl text-slate-400 group-hover:text-primary mb-1 transition-colors">fingerprint</span>
-                            <span className="text-xs font-bold text-slate-600 dark:text-gray-300">Biometric</span>
-                        </button>
-                    </div>
 
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-200 dark:border-gray-800"></div>
-                        </div>
-                        <div className="relative flex justify-center text-xs">
-                            <span className="px-4 bg-white dark:bg-gray-900 text-slate-500">Or continue with email</span>
-                        </div>
-                    </div>
 
                     <form className="mt-6 space-y-4" onSubmit={handleLogin}>
                         {/* Error Display */}
                         {displayError && (
-                            <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl">
+                            <div id="login-error" className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl" aria-live="polite">
                                 <div className="flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-red-500 text-lg">error</span>
+                                    <span className="material-symbols-outlined text-red-500 text-lg" aria-hidden="true">error</span>
                                     <p className="text-sm text-red-600 dark:text-red-400 font-medium">{displayError}</p>
                                 </div>
                             </div>
@@ -146,9 +127,11 @@ const LoginPage = () => {
                                         placeholder="name@company.com"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        aria-invalid={!!displayError}
+                                        aria-describedby={displayError ? "login-error" : undefined}
                                     />
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <span className="material-symbols-outlined text-slate-400 text-lg">mail</span>
+                                        <span className="material-symbols-outlined text-slate-500 text-lg" aria-hidden="true">mail</span>
                                     </div>
                                 </div>
                             </div>
@@ -170,9 +153,11 @@ const LoginPage = () => {
                                         placeholder="••••••••"
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        aria-invalid={!!displayError}
+                                        aria-describedby={displayError ? "login-error" : undefined}
                                     />
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <span className="material-symbols-outlined text-slate-400 text-lg">lock</span>
+                                        <span className="material-symbols-outlined text-slate-500 text-lg" aria-hidden="true">lock</span>
                                     </div>
                                 </div>
                             </div>
@@ -203,7 +188,7 @@ const LoginPage = () => {
 
                     </form>
 
-                    <p className="mt-6 text-center text-xs text-slate-600 dark:text-gray-400">
+                    <p className="mt-6 text-center text-xs text-slate-600 dark:text-gray-500">
                         Don't have an account?{' '}
                         <Link to="/register" className="font-bold text-primary hover:text-primary-dark transition-colors">
                             Create free account

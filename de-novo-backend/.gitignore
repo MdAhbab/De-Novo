@@ -1,0 +1,59 @@
+# Environment variables — NEVER commit secrets
+.env
+*.env
+!.env.example
+
+# Database files
+db.sqlite3
+*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+ENV/
+
+# Django
+staticfiles/
+media/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Planning / scratch files (move to /docs)
+backendprompt.md
+frontendprompt.md
+hackathon-roadmap.md
+quick-reference
+
+# Test databases
+test_*.sqlite3

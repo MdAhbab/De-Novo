@@ -1,201 +1,193 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 import { useSpeechToText } from '../hooks/useSpeechToText';
+import Avatar from '../components/common/Avatar';
 
+// Align with backend MOOD_CHOICES where possible
 const MOODS = [
-    { id: 'happy', icon: 'sentiment_very_satisfied', label: 'Happy', color: 'green' },
+    { id: 'very_happy', icon: 'sentiment_very_satisfied', label: 'Great', color: 'green' },
+    { id: 'happy', icon: 'sentiment_satisfied', label: 'Good', color: 'green' },
+    { id: 'neutral', icon: 'sentiment_neutral', label: 'Okay', color: 'slate' },
     { id: 'anxious', icon: 'sentiment_worried', label: 'Anxious', color: 'amber' },
     { id: 'tired', icon: 'bedtime', label: 'Tired', color: 'purple' },
-    { id: 'angry', icon: 'mood_bad', label: 'Angry', color: 'red' },
+    { id: 'frustrated', icon: 'mood_bad', label: 'Frustrated', color: 'red' },
     { id: 'calm', icon: 'self_improvement', label: 'Calm', color: 'blue' },
-    { id: 'sad', icon: 'sentiment_dissatisfied', label: 'Sad', color: 'slate' }
+    { id: 'sad', icon: 'sentiment_dissatisfied', label: 'Sad', color: 'blue' }
 ];
 
-const SOUND_CATEGORIES = ['Nature Sounds', 'Music', 'White Noise', 'Frequencies'];
+const SOUND_CATEGORIES = ['Nature', 'Music', 'White Noise', 'Meditation'];
 
 const MoodZonePage = () => {
+    const { user, getUserDisplayName } = useAuth();
+    const displayName = getUserDisplayName();
+
     const [selectedMood, setSelectedMood] = useState(null);
     const [notes, setNotes] = useState('');
     const [sounds, setSounds] = useState([]);
     const [recommendedSounds, setRecommendedSounds] = useState([]);
     const [currentSound, setCurrentSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [activeCategory, setActiveCategory] = useState('Nature Sounds');
+    const [activeCategory, setActiveCategory] = useState('Nature');
     const [moodHistory, setMoodHistory] = useState([]);
     const [loading, setLoading] = useState(false);
     const [timer, setTimer] = useState(null);
-    const [timerDuration, setTimerDuration] = useState(5);
+    const [timeRemaining, setTimeRemaining] = useState(null);
     
+    const audioRef = useRef(null);
     const { isListening, transcript, startListening, stopListening, clearTranscript } = useSpeechToText();
 
-    // Fetch sounds on mount
     useEffect(() => {
         fetchSounds();
         fetchMoodHistory();
     }, []);
 
-    // Handle voice transcript
     useEffect(() => {
         if (transcript) {
-            setNotes(prev => prev + ' ' + transcript);
+            setNotes(prev => (prev ? prev + ' ' : '') + transcript);
             clearTranscript();
         }
     }, [transcript, clearTranscript]);
 
-    // Fetch recommended sounds when mood changes
     useEffect(() => {
         if (selectedMood) {
             fetchRecommendedSounds(selectedMood);
         }
     }, [selectedMood]);
 
+    // Audio Player effect
+    useEffect(() => {
+        if (audioRef.current) {
+            if (isPlaying && currentSound) {
+                audioRef.current.play().catch(e => {
+                    console.error("Audio playback failed", e);
+                    setIsPlaying(false);
+                });
+            } else {
+                audioRef.current.pause();
+            }
+        }
+    }, [isPlaying, currentSound]);
+
+    // Timer effect
+    useEffect(() => {
+        let interval = null;
+        if (timeRemaining !== null && timeRemaining > 0 && isPlaying) {
+            interval = setInterval(() => {
+                setTimeRemaining(prev => prev - 1);
+            }, 1000);
+        } else if (timeRemaining === 0) {
+            setIsPlaying(false);
+            setTimeRemaining(null);
+        }
+        return () => clearInterval(interval);
+    }, [timeRemaining, isPlaying]);
+
+    const formatTime = (seconds) => {
+        if (seconds === null) return null;
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
+
+    const handleSetTimer = (minutes) => {
+        setTimeRemaining(minutes * 60);
+    };
+
     const fetchSounds = async () => {
         try {
-            const response = await api.mood.getSounds();
-            // Handle various response formats
-            if (Array.isArray(response)) {
-                setSounds(response);
-            } else if (response?.data && Array.isArray(response.data)) {
-                setSounds(response.data);
-            } else if (response?.results && Array.isArray(response.results)) {
-                setSounds(response.results);
-            } else {
-                console.log('Sounds response:', response);
-                setSounds([]);
+            const res = await api.mood.getSounds();
+            if (res.success && Array.isArray(res.data)) {
+                setSounds(res.data);
             }
         } catch (err) {
             console.error('Failed to fetch sounds:', err);
-            setSounds([]);
         }
     };
 
     const fetchMoodHistory = async () => {
         try {
-            const response = await api.mood.getMoodHistory(7);
-            // Handle various response formats
-            if (Array.isArray(response)) {
-                setMoodHistory(response);
-            } else if (response?.data && Array.isArray(response.data)) {
-                setMoodHistory(response.data);
-            } else if (response?.results && Array.isArray(response.results)) {
-                setMoodHistory(response.results);
-            } else {
-                console.log('Mood history response:', response);
-                setMoodHistory([]);
+            const res = await api.mood.getMoodHistory(7);
+            if (res.success && Array.isArray(res.data)) {
+                setMoodHistory(res.data);
             }
         } catch (err) {
             console.error('Failed to fetch mood history:', err);
-            setMoodHistory([]);
         }
     };
 
     const fetchRecommendedSounds = async (mood) => {
         try {
-            const response = await api.mood.getRecommendedSounds(mood);
-            // Handle various response formats
-            if (Array.isArray(response)) {
-                setRecommendedSounds(response);
-            } else if (response?.data && Array.isArray(response.data)) {
-                setRecommendedSounds(response.data);
-            } else if (response?.results && Array.isArray(response.results)) {
-                setRecommendedSounds(response.results);
-            } else {
-                setRecommendedSounds([]);
+            const res = await api.mood.getRecommendedSounds(mood);
+            if (res.success && Array.isArray(res.data)) {
+                setRecommendedSounds(res.data);
             }
         } catch (err) {
             console.error('Failed to fetch recommended sounds:', err);
-            setRecommendedSounds([]);
         }
-    };
-
-    const handleMoodSelect = async (moodId) => {
-        setSelectedMood(moodId);
     };
 
     const handleLogMood = async () => {
         if (!selectedMood) return;
-        
         setLoading(true);
         try {
-            const response = await api.mood.logMood(selectedMood, notes);
-            // Handle various response formats - success if we get any valid response without error
-            if (response && !response.error) {
-                // Clear form and refresh history
+            const res = await api.mood.logMood(selectedMood, notes);
+            if (res.success) {
                 setNotes('');
+                setSelectedMood(null);
                 fetchMoodHistory();
-                // Show success feedback
-                alert('Mood logged successfully!');
             } else {
-                alert(response?.error?.message || 'Failed to log mood');
+                alert(res.error?.message || 'Failed to log mood');
             }
         } catch (err) {
-            console.error('Failed to log mood:', err);
-            alert('Failed to log mood. Please try again.');
+            alert('Failed to log mood.');
         } finally {
             setLoading(false);
         }
     };
 
     const handlePlaySound = (sound) => {
-        if (currentSound?.id === sound.id && isPlaying) {
-            setIsPlaying(false);
+        if (currentSound?.id === sound.id) {
+            setIsPlaying(!isPlaying);
         } else {
             setCurrentSound(sound);
             setIsPlaying(true);
         }
     };
 
-    const handleVoiceInput = () => {
-        if (isListening) {
-            stopListening();
-        } else {
-            startListening();
-        }
+    const getMoodDetails = (moodId) => {
+        return MOODS.find(m => m.id === moodId) || MOODS[2]; // Default to neutral
     };
 
-    const filteredSounds = Array.isArray(sounds) ? sounds.filter(s => 
-        s.category?.toLowerCase().includes(activeCategory.toLowerCase().replace(' ', '_'))
-    ) : [];
+    const filteredSounds = sounds.filter(s => 
+        s.category?.toLowerCase() === activeCategory.toLowerCase().replace(' ', '_')
+    );
 
-    const getMoodColor = (color) => {
-        const colors = {
-            green: 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border-green-200 dark:border-green-800 text-green-600 dark:text-green-400',
-            amber: 'bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400',
-            purple: 'bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400',
-            red: 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400',
-            blue: 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400',
-            slate: 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400'
-        };
-        return colors[color] || colors.slate;
-    };
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen flex flex-col">
+            {/* Audio Element */}
+            <audio ref={audioRef} src={currentSound?.file_url} loop />
+
             {/* Navbar */}
             <header className="sticky top-0 z-50 w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-gray-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         <Link to="/" className="flex items-center gap-3">
                             <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                                <span className="material-symbols-outlined">psychology_alt</span>
+                                <span className="material-symbols-outlined" aria-hidden="true">psychology_alt</span>
                             </div>
                             <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">De-Novo <span className="text-primary font-normal text-sm ml-1">Mood Zone</span></h1>
                         </Link>
                         <nav className="hidden md:flex gap-8">
                             <Link to="/dashboard" className="text-sm font-medium text-slate-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Home</Link>
-                            <Link to="/" className="text-sm font-medium text-slate-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Community</Link>
-                            <Link to="/mood-zone" className="text-sm font-medium text-primary font-bold">Mood Zone</Link>
-                            <Link to="#" className="text-sm font-medium text-slate-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Resources</Link>
+                            <Link to="/chat" className="text-sm font-medium text-slate-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Messages</Link>
+                            <Link to="/mood-zone" aria-current="page" className="text-sm font-medium text-primary font-bold">Mood Zone</Link>
                         </nav>
                         <div className="flex items-center gap-4">
-                            <button aria-label="Toggle High Contrast" className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-full">
-                                <span className="material-symbols-outlined text-[20px]">contrast</span>
-                            </button>
-                            <div
-                                className="h-9 w-9 rounded-full bg-cover bg-center border-2 border-slate-100 dark:border-gray-700"
-                                data-alt="User profile avatar showing a smiling person"
-                                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBXEAdWOezD0ihSjc_ZFfw5iUfcK6Gr4jiWja6_v1QeEGw7gSwyFXtqvY-2SE4hy2gaUzHsHmDizCpZ-FhHEoX3WE6PVwSkaxICyWQ3P7_gJHDdqh-vzl3Qy4c89h3e6fc0nU4NuG7dUTCH6dquTyoYvCndjuSWiJRga5MDImEI1MJwckkxCx6UdsFVUAhPuedFQVkRjUcs9NUOFGVClH5DmaMxSspPngfudWzBB5hei5O56_Dp4Q6CLjqqfFUjCxX-0oHzHFpW9Uw')" }}
-                            ></div>
+                            <Link to="/profile">
+                                <Avatar src={user?.avatar} name={displayName} username={user?.username} userId={user?.id} size="size-9" />
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -204,23 +196,27 @@ const MoodZonePage = () => {
             {/* Main Content */}
             <main className="flex-grow p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
-                    {/* Left Column: Check-in & Input (3 cols) */}
+                    {/* Left Column: Check-in & Input */}
                     <section aria-labelledby="check-in-heading" className="lg:col-span-3 flex flex-col gap-6">
                         <div className="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-gray-800">
                             <h2 className="text-2xl font-bold mb-1" id="check-in-heading">Check-in</h2>
-                            <p className="text-sm text-slate-500 dark:text-gray-400 mb-6">How are you feeling right now?</p>
+                            <p className="text-sm text-slate-500 dark:text-gray-500 mb-6">How are you feeling right now?</p>
+                            
                             {/* Mood Grid */}
                             <div className="grid grid-cols-2 gap-3 mb-6">
-                                {MOODS.map((mood) => (
-                                    <button 
-                                        key={mood.id}
-                                        onClick={() => handleMoodSelect(mood.id)}
-                                        className={`group flex flex-col items-center justify-center p-4 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-${mood.color}-500 ${getMoodColor(mood.color)} ${selectedMood === mood.id ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-gray-900' : 'border border-transparent'}`}
-                                    >
-                                        <span className={`material-symbols-outlined text-3xl mb-2 icon-filled`}>{mood.icon}</span>
-                                        <span className="text-xs font-semibold">{mood.label}</span>
-                                    </button>
-                                ))}
+                                {MOODS.map((mood) => {
+                                    const isSelected = selectedMood === mood.id;
+                                    return (
+                                        <button 
+                                            key={mood.id}
+                                            onClick={() => setSelectedMood(mood.id)}
+                                            className={`group flex flex-col items-center justify-center p-4 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-${mood.color}-500 ${isSelected ? `bg-${mood.color}-100 dark:bg-${mood.color}-900/40 border-${mood.color}-400 ring-2 ring-primary ring-offset-2 dark:ring-offset-gray-900` : `bg-slate-50 dark:bg-gray-800 border-transparent hover:bg-slate-100 dark:hover:bg-gray-700`} border`}
+                                        >
+                                            <span className={`material-symbols-outlined text-3xl mb-2 icon-filled ${isSelected ? `text-${mood.color}-600 dark:text-${mood.color}-400` : 'text-slate-500 dark:text-gray-500'}`} aria-hidden="true">{mood.icon}</span>
+                                            <span className={`text-xs font-semibold ${isSelected ? `text-${mood.color}-700 dark:text-${mood.color}-300` : 'text-slate-600 dark:text-gray-500'}`}>{mood.label}</span>
+                                        </button>
+                                    );
+                                })}
                             </div>
                             
                             {/* Notes Input */}
@@ -251,22 +247,22 @@ const MoodZonePage = () => {
                             {/* Voice Input */}
                             <div className="pt-4 border-t border-slate-100 dark:border-gray-800">
                                 <button 
-                                    onClick={handleVoiceInput}
+                                    onClick={isListening ? stopListening : startListening}
                                     className={`w-full flex items-center justify-center gap-3 ${isListening ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-slate-50 dark:bg-gray-800 border-slate-200 dark:border-gray-700'} hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-900 dark:text-white p-4 rounded-xl border transition-colors group`}
                                 >
                                     <div className={`${isListening ? 'bg-red-100 dark:bg-red-900/30 animate-pulse' : 'bg-primary/10 dark:bg-primary/20'} p-2 rounded-full group-hover:scale-110 transition-transform`}>
-                                        <span className={`material-symbols-outlined ${isListening ? 'text-red-500' : 'text-primary'}`}>mic</span>
+                                        <span className={`material-symbols-outlined ${isListening ? 'text-red-500' : 'text-primary'}`} aria-hidden="true">mic</span>
                                     </div>
                                     <div className="flex flex-col items-start">
                                         <span className="text-sm font-bold">{isListening ? 'Listening...' : 'Voice Input'}</span>
-                                        <span className="text-xs text-slate-500 dark:text-gray-400">{isListening ? 'Tap to stop' : 'Record your thoughts'}</span>
+                                        <span className="text-xs text-slate-500 dark:text-gray-500">{isListening ? 'Tap to stop' : 'Record your thoughts'}</span>
                                     </div>
                                 </button>
                             </div>
                         </div>
                     </section>
 
-                    {/* Center Column: Sensory Experience (6 cols) */}
+                    {/* Center Column: Sensory Experience */}
                     <section aria-labelledby="experience-heading" className="lg:col-span-6 flex flex-col gap-6">
                         <div className="bg-surface-light dark:bg-surface-dark rounded-2xl p-1 shadow-sm border border-slate-100 dark:border-gray-800 h-full flex flex-col">
                             {/* Tabs */}
@@ -285,163 +281,142 @@ const MoodZonePage = () => {
                                     </button>
                                 ))}
                             </div>
-                            {/* Visualizer Area */}
-                            <div className="relative flex-1 bg-gradient-to-b from-slate-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl m-2 min-h-[300px] flex items-center justify-center overflow-hidden border border-slate-100 dark:border-gray-700">
-                                {/* Background Image Layer */}
-                                <div
-                                    className="absolute inset-0 opacity-10 dark:opacity-20 bg-cover bg-center"
-                                    data-alt="Abstract calming forest pattern"
-                                    style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBlYgfNhSZPsPj9RF86CeJj_abLQV3eL8-O1Kv5fHVMzJDjkSHqpP20-ez_oINCmCTXGvSVxcycxTvwY2ZnMpMhLSXZyULrKIZXRgAiqElLdBqrWqnhC7KsEaMg1bccao0-oL0cyOGi9qwtewSUtpQ5fvugjE_6TMfFZ3H3q9t1DsCVWea4xDajL-CYmkD_vWxpo6wiVqxfhdU__XWQh8-NKUT8XHzM3kM5Wo1JrpzOsBMT-LdcexU5IALxhNauEVRQHG4drg0oR18')" }}
-                                ></div>
-                                {/* Sound Wave Animation (CSS) */}
-                                <div aria-label="Visual representation of sound waves playing" className="relative z-10 flex items-center justify-center gap-2 h-32 w-full max-w-md px-10">
-                                    <div className="w-3 bg-primary rounded-full h-full animate-wave-1"></div>
-                                    <div className="w-3 bg-primary/80 rounded-full h-full animate-wave-2"></div>
-                                    <div className="w-3 bg-primary/60 rounded-full h-full animate-wave-3"></div>
-                                    <div className="w-3 bg-primary/40 rounded-full h-full animate-wave-4"></div>
-                                    <div className="w-3 bg-primary/80 rounded-full h-full animate-wave-5"></div>
-                                    <div className="w-3 bg-primary/60 rounded-full h-full animate-wave-2"></div>
-                                    <div className="w-3 bg-primary rounded-full h-full animate-wave-1"></div>
+                            
+                            {/* Available Sounds List for the category (if no sound playing) */}
+                            {!currentSound && (
+                                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+                                    {filteredSounds.map(sound => (
+                                        <button 
+                                            key={sound.id}
+                                            onClick={() => handlePlaySound(sound)}
+                                            className="bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl p-4 flex items-center gap-4 hover:border-primary transition-colors text-left"
+                                        >
+                                            <div className="h-12 w-12 rounded-lg bg-slate-200 dark:bg-gray-700 bg-cover bg-center shrink-0" style={{ backgroundImage: sound.thumbnail_url ? `url(${sound.thumbnail_url})` : 'none' }}>
+                                                {!sound.thumbnail_url && <span className="material-symbols-outlined flex items-center justify-center h-full w-full text-slate-500" aria-hidden="true">music_note</span>}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-sm text-slate-900 dark:text-white">{sound.name}</h4>
+                                                <p className="text-xs text-slate-500">{Math.floor(sound.duration / 60)} min</p>
+                                            </div>
+                                        </button>
+                                    ))}
+                                    {filteredSounds.length === 0 && (
+                                        <div className="col-span-2 text-center text-slate-500 py-10">
+                                            No sounds found for this category.
+                                        </div>
+                                    )}
                                 </div>
-                                {/* Track Info Overlay */}
-                                <div className="absolute bottom-6 left-6 z-20">
-                                    <div className="flex items-center gap-3">
+                            )}
+
+                            {/* Visualizer Area (if sound playing) */}
+                            {currentSound && (
+                                <>
+                                    <div className="relative flex-1 bg-gradient-to-b from-slate-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl m-2 min-h-[300px] flex items-center justify-center overflow-hidden border border-slate-100 dark:border-gray-700">
+                                        {/* Background Image Layer */}
                                         <div
-                                            className="h-12 w-12 rounded-lg bg-cover bg-center shadow-lg"
-                                            data-alt="Album art for Forest Rain track"
-                                            style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBEsYLM6chr-ZFik5P6Lu1aP9_XPueUFQvRYYkd_CszaQPKZdfCgd_HftWjQ3xJVx0fJrFhlk4UYEvRc8vJx13J6ibR6QptusCAqLI7xIvudrjaOfe8XHjv2YaCgSLPUvcAgUqdjWtlN-aw7RHHHT7X1Il8rCQERZRHC0fpVkV6Pfpue5F0Qzf7nkduN6nhzHCrY-vsqCSVIJLiEhasHVP46HIfmKNKzFYUW4owJFmA27IagKUU1g8Rs--E5YcWxfmjU36KdeTNOuQ')" }}
+                                            className="absolute inset-0 opacity-10 dark:opacity-20 bg-cover bg-center"
+                                            style={{ backgroundImage: currentSound.thumbnail_url ? `url('${currentSound.thumbnail_url}')` : 'none' }}
                                         ></div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">Forest Rain</h3>
-                                            <p className="text-sm text-primary font-medium">Nature Sounds • 432Hz</p>
+                                        
+                                        {/* Sound Wave Animation (CSS) */}
+                                        <div aria-label="Visual representation of sound waves playing" className="relative z-10 flex items-center justify-center gap-2 h-32 w-full max-w-md px-10">
+                                            {isPlaying ? (
+                                                <>
+                                                    <div className="w-3 bg-primary rounded-full h-full animate-wave-1"></div>
+                                                    <div className="w-3 bg-primary/80 rounded-full h-full animate-wave-2"></div>
+                                                    <div className="w-3 bg-primary/60 rounded-full h-full animate-wave-3"></div>
+                                                    <div className="w-3 bg-primary/40 rounded-full h-full animate-wave-4"></div>
+                                                    <div className="w-3 bg-primary/80 rounded-full h-full animate-wave-5"></div>
+                                                    <div className="w-3 bg-primary/60 rounded-full h-full animate-wave-2"></div>
+                                                    <div className="w-3 bg-primary rounded-full h-full animate-wave-1"></div>
+                                                </>
+                                            ) : (
+                                                <div className="w-full h-2 bg-primary/20 rounded-full"></div>
+                                            )}
                                         </div>
-                                    </div>
-                                </div>
-                                {/* Timer Badge */}
-                                <div className="absolute top-6 right-6 z-20 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-200 dark:border-gray-600 flex items-center gap-2 shadow-sm">
-                                    <span className="material-symbols-outlined text-primary text-sm">timer</span>
-                                    <span className="text-sm font-bold font-mono">14:23</span>
-                                </div>
-                            </div>
-                            {/* Player Controls */}
-                            <div className="p-6">
-                                {/* Progress Bar */}
-                                <div aria-label="Audio progress" aria-valuemax="100" aria-valuemin="0" aria-valuenow="45" className="w-full bg-slate-100 dark:bg-gray-700 rounded-full h-1.5 mb-6 cursor-pointer group" role="slider">
-                                    <div className="bg-primary h-1.5 rounded-full w-[45%] group-hover:bg-primary-dark transition-colors relative">
-                                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 bg-primary rounded-full opacity-0 group-hover:opacity-100 shadow-md"></div>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                                    {/* Main Playback */}
-                                    <div className="flex items-center gap-6">
-                                        <button aria-label="Previous track" className="text-slate-400 hover:text-slate-600 dark:hover:text-gray-200 transition-colors">
-                                            <span className="material-symbols-outlined text-3xl">skip_previous</span>
-                                        </button>
-                                        <button aria-label="Pause" className="bg-primary hover:bg-primary-dark text-white rounded-full p-4 shadow-lg shadow-primary/30 transition-all hover:scale-105 active:scale-95 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-4xl icon-filled">pause</span>
-                                        </button>
-                                        <button aria-label="Next track" className="text-slate-400 hover:text-slate-600 dark:hover:text-gray-200 transition-colors">
-                                            <span className="material-symbols-outlined text-3xl">skip_next</span>
-                                        </button>
-                                    </div>
-                                    {/* Timer & Volume */}
-                                    <div className="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-end">
-                                        <div className="flex bg-slate-100 dark:bg-gray-800 rounded-lg p-1">
-                                            <button aria-label="Set timer for 5 minutes" className="px-3 py-1.5 text-xs font-semibold rounded bg-white dark:bg-gray-700 shadow-sm text-slate-800 dark:text-white">5m</button>
-                                            <button aria-label="Set timer for 15 minutes" className="px-3 py-1.5 text-xs font-medium rounded hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-600 dark:text-gray-400 transition-colors">15m</button>
-                                            <button aria-label="Set timer for 30 minutes" className="px-3 py-1.5 text-xs font-medium rounded hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-600 dark:text-gray-400 transition-colors">30m</button>
+                                        
+                                        {/* Track Info Overlay */}
+                                        <div className="absolute bottom-6 left-6 z-20">
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="h-12 w-12 rounded-lg bg-cover bg-center shadow-lg bg-slate-200 dark:bg-gray-700"
+                                                    style={{ backgroundImage: currentSound.thumbnail_url ? `url('${currentSound.thumbnail_url}')` : 'none' }}
+                                                ></div>
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">{currentSound.name}</h3>
+                                                    <p className="text-sm text-primary font-medium">{currentSound.category} • {Math.floor(currentSound.duration / 60)} min</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-slate-400">
-                                            <span className="material-symbols-outlined text-xl">volume_up</span>
-                                            <div className="w-20 h-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                <div className="w-2/3 h-full bg-slate-400 dark:bg-gray-500 rounded-full"></div>
+                                        
+                                        {/* Timer Badge */}
+                                        {timeRemaining !== null && (
+                                            <div className="absolute top-6 right-6 z-20 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-200 dark:border-gray-600 flex items-center gap-2 shadow-sm">
+                                                <span className="material-symbols-outlined text-primary text-sm" aria-hidden="true">timer</span>
+                                                <span className="text-sm font-bold font-mono">{formatTime(timeRemaining)}</span>
+                                            </div>
+                                        )}
+                                        <button onClick={() => setCurrentSound(null)} className="absolute top-6 left-6 z-20 p-2 bg-white/80 dark:bg-gray-800/80 rounded-full hover:bg-white dark:hover:bg-gray-700 transition">
+                                            <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
+                                        </button>
+                                    </div>
+                                    
+                                    {/* Player Controls */}
+                                    <div className="p-6">
+                                        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                                            {/* Main Playback */}
+                                            <div className="flex items-center gap-6">
+                                                <button onClick={() => handlePlaySound(currentSound)} aria-label={isPlaying ? 'Pause' : 'Play'} className="bg-primary hover:bg-primary-dark text-white rounded-full p-4 shadow-lg shadow-primary/30 transition-all hover:scale-105 active:scale-95 flex items-center justify-center">
+                                                    <span className="material-symbols-outlined text-4xl icon-filled" aria-hidden="true">{isPlaying ? 'pause' : 'play_arrow'}</span>
+                                                </button>
+                                            </div>
+                                            {/* Timer & Volume */}
+                                            <div className="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-end">
+                                                <div className="flex bg-slate-100 dark:bg-gray-800 rounded-lg p-1">
+                                                    <button onClick={() => handleSetTimer(5)} className="px-3 py-1.5 text-xs font-semibold rounded hover:bg-slate-200 dark:hover:bg-gray-700 text-slate-800 dark:text-gray-300">5m</button>
+                                                    <button onClick={() => handleSetTimer(15)} className="px-3 py-1.5 text-xs font-medium rounded hover:bg-slate-200 dark:hover:bg-gray-700 text-slate-800 dark:text-gray-300">15m</button>
+                                                    <button onClick={() => handleSetTimer(30)} className="px-3 py-1.5 text-xs font-medium rounded hover:bg-slate-200 dark:hover:bg-gray-700 text-slate-800 dark:text-gray-300">30m</button>
+                                                    {timeRemaining !== null && (
+                                                        <button onClick={() => handleSetTimer(0)} className="px-3 py-1.5 text-xs font-medium rounded text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">Clear</button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
+                                </>
+                            )}
                         </div>
                     </section>
 
-                    {/* Right Column: Reflection & Recs (3 cols) */}
+                    {/* Right Column: Reflection & Recs */}
                     <section aria-labelledby="history-heading" className="lg:col-span-3 flex flex-col gap-6">
-                        {/* Recommendation Widget */}
-                        <div className="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-transparent rounded-2xl p-6 border border-primary/20">
-                            <div className="flex items-start justify-between mb-4">
-                                <h3 className="font-bold text-lg text-primary-dark dark:text-primary">Recommended</h3>
-                                <span className="material-symbols-outlined text-primary/60">auto_awesome</span>
-                            </div>
-                            <p className="text-sm text-slate-600 dark:text-gray-300 mb-4 leading-relaxed">
-                                Since you selected <strong className="text-slate-900 dark:text-white">Calm</strong>, try this breathing exercise to maintain your flow.
-                            </p>
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-3 flex items-center gap-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow">
-                                <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
-                                    <span className="material-symbols-outlined">air</span>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold">Box Breathing</h4>
-                                    <p className="text-xs text-slate-500">4 min session</p>
-                                </div>
-                                <button aria-label="Play breathing exercise" className="ml-auto text-primary hover:bg-primary/10 rounded-full p-1">
-                                    <span className="material-symbols-outlined">play_arrow</span>
-                                </button>
-                            </div>
-                        </div>
-
                         {/* History List */}
-                        <div className="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-gray-800 flex-1">
+                        <div className="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-gray-800 flex-1 overflow-y-auto">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-bold text-lg" id="history-heading">Journal</h3>
-                                <button className="text-xs font-semibold text-primary hover:underline">View All</button>
                             </div>
                             <div className="space-y-4">
-                                {/* History Item */}
-                                <div className="relative pl-4 border-l-2 border-slate-200 dark:border-gray-700 pb-2 last:pb-0">
-                                    <div className="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-white dark:bg-gray-800 border-2 border-green-500"></div>
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <p className="text-xs text-slate-400 mb-0.5">Today, 9:00 AM</p>
-                                            <p className="text-sm font-bold text-slate-800 dark:text-gray-200">Feeling Good</p>
-                                        </div>
-                                        <span className="material-symbols-outlined text-green-500 text-lg icon-filled">sentiment_very_satisfied</span>
-                                    </div>
-                                </div>
-                                {/* History Item */}
-                                <div className="relative pl-4 border-l-2 border-slate-200 dark:border-gray-700 pb-2 last:pb-0">
-                                    <div className="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-white dark:bg-gray-800 border-2 border-amber-500"></div>
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <p className="text-xs text-slate-400 mb-0.5">Yesterday, 8:30 PM</p>
-                                            <p className="text-sm font-bold text-slate-800 dark:text-gray-200">A bit Anxious</p>
-                                        </div>
-                                        <span className="material-symbols-outlined text-amber-500 text-lg icon-filled">sentiment_worried</span>
-                                    </div>
-                                </div>
-                                {/* History Item */}
-                                <div className="relative pl-4 border-l-2 border-slate-200 dark:border-gray-700 pb-2 last:pb-0">
-                                    <div className="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-white dark:bg-gray-800 border-2 border-slate-400"></div>
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <p className="text-xs text-slate-400 mb-0.5">Yesterday, 2:15 PM</p>
-                                            <p className="text-sm font-bold text-slate-800 dark:text-gray-200">Neutral</p>
-                                        </div>
-                                        <span className="material-symbols-outlined text-slate-400 text-lg icon-filled">sentiment_neutral</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Stats/Summary Mini-Card */}
-                            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-gray-700">
-                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Weekly Mood Flow</h4>
-                                <div aria-label="Bar chart showing weekly mood trends" className="flex items-end justify-between h-16 gap-1">
-                                    <div className="w-full bg-green-200 dark:bg-green-900/40 rounded-t-sm h-[60%]" title="Mon"></div>
-                                    <div className="w-full bg-amber-200 dark:bg-amber-900/40 rounded-t-sm h-[40%]" title="Tue"></div>
-                                    <div className="w-full bg-blue-200 dark:bg-blue-900/40 rounded-t-sm h-[80%]" title="Wed"></div>
-                                    <div className="w-full bg-green-200 dark:bg-green-900/40 rounded-t-sm h-[50%]" title="Thu"></div>
-                                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-t-sm h-[30%]" title="Fri"></div>
-                                    <div className="w-full bg-green-400 dark:bg-green-600 rounded-t-sm h-[90%]" title="Sat (Today)"></div>
-                                    <div className="w-full bg-slate-100 dark:bg-gray-800 rounded-t-sm h-[10%]" title="Sun"></div>
-                                </div>
+                                {moodHistory.length === 0 ? (
+                                    <p className="text-slate-500 dark:text-gray-500 text-sm">No recent entries.</p>
+                                ) : (
+                                    moodHistory.slice(0, 8).map(entry => {
+                                        const moodObj = getMoodDetails(entry.mood);
+                                        const date = new Date(entry.created_at);
+                                        return (
+                                            <div key={entry.id} className="relative pl-4 border-l-2 border-slate-200 dark:border-gray-700 pb-2 last:pb-0">
+                                                <div className={`absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-white dark:bg-gray-800 border-2 border-${moodObj.color}-500`}></div>
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <p className="text-xs text-slate-500 mb-0.5">{date.toLocaleDateString()} {date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                                        <p className="text-sm font-bold text-slate-800 dark:text-gray-200 capitalize">{entry.mood.replace('_', ' ')}</p>
+                                                        {entry.notes && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{entry.notes}</p>}
+                                                    </div>
+                                                    <span className={`material-symbols-outlined text-${moodObj.color}-500 text-lg icon-filled`} aria-hidden="true">{moodObj.icon}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
                             </div>
                         </div>
                     </section>

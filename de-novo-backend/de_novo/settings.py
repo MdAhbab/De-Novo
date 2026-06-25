@@ -4,6 +4,7 @@ Accessible Social Communication Platform
 """
 
 import os
+import logging
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
@@ -15,10 +16,14 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-production')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-production-do-not-use')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+
+# Fail fast if insecure key in production
+if not DEBUG and SECRET_KEY == 'django-insecure-change-this-in-production-do-not-use':
+    raise ValueError("You must set a secure SECRET_KEY in production!")
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
@@ -35,6 +40,7 @@ INSTALLED_APPS = [
     # Third party apps
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',  # BE-06: JWT blacklist for logout
     'corsheaders',
     'channels',
     
@@ -79,35 +85,76 @@ TEMPLATES = [
 WSGI_APPLICATION = 'de_novo.wsgi.application'
 ASGI_APPLICATION = 'de_novo.asgi.application'
 
-# Channel Layers (Redis for WebSocket)
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [os.environ.get('REDIS_URL', 'redis://localhost:6379/0')],
-        },
-    },
-}
+# Channel Layers — use RabbitMQ (via channels_rabbitmq) or Redis depending on availability
+# Default to InMemoryChannelLayer for dev if no broker configured.
+_channel_backend = os.environ.get('CHANNEL_BACKEND', 'memory')
 
-# Database Configuration
-# Using MySQL database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME', 'de_novo'),
-        'USER': os.environ.get('DB_USER', 'root'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', '12345678'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '3306'),
-        'OPTIONS': {
-            'charset': 'utf8mb4',
+if _channel_backend == 'rabbitmq':
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_rabbitmq.core.RabbitmqChannelLayer',
+            'CONFIG': {
+                'host': os.environ.get('RABBITMQ_URL', 'amqp://guest:guest@localhost/'),
+            },
         },
     }
-}
+elif _channel_backend == 'redis':
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [os.environ.get('REDIS_URL', 'redis://localhost:6379/0')],
+            },
+        },
+    }
+else:
+    # In-memory channel layer for single-server dev (no Redis/RabbitMQ required)
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
-# MongoDB Configuration (for messages - using PyMongo directly)
-MONGODB_URI = os.environ.get('MONGODB_URI', 'mongodb://localhost:27017')
-MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'de_novo_chat')
+# ── Database Configuration ───────────────────────────────────────────────────
+# Defaults to SQLite for development so a fresh clone just works (BE-01).
+# In production, set DATABASE_URL env var (e.g. mysql://user:pass@host/db).
+_database_url = os.environ.get('DATABASE_URL', '')
+
+if _database_url.startswith('mysql://') or _database_url.startswith('mysql+mysqlclient://'):
+    import urllib.parse
+    _parsed = urllib.parse.urlparse(_database_url)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': _parsed.path.lstrip('/'),
+            'USER': _parsed.username,
+            'PASSWORD': _parsed.password,
+            'HOST': _parsed.hostname,
+            'PORT': str(_parsed.port or 3306),
+            'OPTIONS': {'charset': 'utf8mb4'},
+        }
+    }
+elif _database_url.startswith('postgres://') or _database_url.startswith('postgresql://'):
+    import urllib.parse
+    _parsed = urllib.parse.urlparse(_database_url)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': _parsed.path.lstrip('/'),
+            'USER': _parsed.username,
+            'PASSWORD': _parsed.password,
+            'HOST': _parsed.hostname,
+            'PORT': str(_parsed.port or 5432),
+        }
+    }
+else:
+    # Default: SQLite — works with zero configuration
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
@@ -158,6 +205,18 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
+    # SEC-06: Rate limiting on all endpoints
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '30/minute',
+        'user': '200/minute',
+        'login': '10/minute',
+        'register': '5/minute',
+        'ai': '30/minute',
+    },
 }
 
 # JWT Configuration
@@ -178,7 +237,7 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
 CORS_ALLOW_CREDENTIALS = True
 
 # Google Cloud Platform Configuration
-GCP_PROJECT_ID = os.environ.get('GCP_PROJECT_ID', 'de-novo-hackathon-483707')
+GCP_PROJECT_ID = os.environ.get('GCP_PROJECT_ID', '')
 GCP_LOCATION = os.environ.get('GCP_LOCATION', 'us-central1')
 GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
 GOOGLE_AI_API_KEY = os.environ.get('GOOGLE_AI_API_KEY', '')
@@ -187,9 +246,22 @@ GOOGLE_AI_API_KEY = os.environ.get('GOOGLE_AI_API_KEY', '')
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
-# Google Cloud / AI Configuration
-GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')  # Gemini API key
-GCP_API_KEY = os.environ.get('GCP_API_KEY')  # Cloud APIs (Speech, TTS, Vision, NLP)
+# Google Cloud / AI Configuration — load from env only, never hardcode
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY', '')   # Gemini API key
+GCP_API_KEY = os.environ.get('GCP_API_KEY', '')         # Cloud APIs (Speech, TTS, Vision, NLP)
+
+# SEC-03: Production security hardening
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
 
 # Logging Configuration
 LOGGING = {
@@ -200,11 +272,15 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
+        'simple': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+            'formatter': 'simple',
         },
     },
     'root': {
@@ -215,6 +291,11 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'apps': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
     },

@@ -8,6 +8,21 @@ export default function AccessibilityToolbar() {
     const { increaseFontSize, decreaseFontSize, ttsEnabled, setTtsEnabled } = useAccessibility();
     const { toggleTheme, setHighContrast, theme } = useTheme();
 
+    // A11Y-05: Escape to close and Alt+A to toggle
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && expanded) {
+                setExpanded(false);
+            }
+            if (e.altKey && e.key.toLowerCase() === 'a') {
+                e.preventDefault();
+                setExpanded((prev) => !prev);
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [expanded]);
+
     if (!expanded) {
         return (
             <button
@@ -22,7 +37,7 @@ export default function AccessibilityToolbar() {
     }
 
     return (
-        <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 p-5 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-72 space-y-4 z-50 animate-in slide-in-from-bottom-5" role="dialog" aria-label="Accessibility Tools">
+        <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 p-5 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-72 space-y-4 z-50 animate-in slide-in-from-bottom-5" role="dialog" aria-modal="true" aria-label="Accessibility Tools">
             <div className="flex justify-between items-center border-b pb-2 mb-2 dark:border-gray-600">
                 <h3 className="font-bold text-lg dark:text-white flex items-center gap-2">
                     <Eye size={20} /> Accessibility
@@ -75,7 +90,7 @@ export default function AccessibilityToolbar() {
                     </button>
                 </div>
             </div>
-            <div className="text-xs text-center text-gray-400 mt-2">
+            <div className="text-xs text-center text-gray-500 mt-2">
                 Press <kbd className="bg-gray-200 px-1 rounded">Alt</kbd> + <kbd className="bg-gray-200 px-1 rounded">A</kbd> to toggle
             </div>
         </div>

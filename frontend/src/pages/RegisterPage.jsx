@@ -127,7 +127,7 @@ const RegisterPage = () => {
     const displayError = localError || authError;
 
     return (
-        <div className="h-screen w-full flex bg-background-light dark:bg-background-dark font-display overflow-hidden">
+        <div className="min-h-screen w-full flex bg-background-light dark:bg-background-dark font-display">
             {/* Left Side - Visual & Branding (Adapted for Register) */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary items-center justify-center p-12">
                 {/* Abstract Background Elements */}
@@ -139,7 +139,7 @@ const RegisterPage = () => {
                 <div className="relative z-20 text-white max-w-lg">
                     <div className="mb-8 flex items-center gap-3">
                         <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-lg">
-                            <span className="material-symbols-outlined text-3xl">diversity_3</span>
+                            <span className="material-symbols-outlined text-3xl" aria-hidden="true">diversity_3</span>
                         </div>
                         <h1 className="text-3xl font-bold tracking-tight">De-Novo</h1>
                     </div>
@@ -151,15 +151,15 @@ const RegisterPage = () => {
                     {/* Feature List */}
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl shadow-xl space-y-4">
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-white/20 rounded-lg"><span className="material-symbols-outlined text-white">accessibility_new</span></div>
+                            <div className="p-2 bg-white/20 rounded-lg"><span className="material-symbols-outlined text-white" aria-hidden="true">accessibility_new</span></div>
                             <span className="font-bold text-lg">Customized Accessibility</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-white/20 rounded-lg"><span className="material-symbols-outlined text-white">sync_saved_locally</span></div>
+                            <div className="p-2 bg-white/20 rounded-lg"><span className="material-symbols-outlined text-white" aria-hidden="true">sync_saved_locally</span></div>
                             <span className="font-bold text-lg">Save Your Preferences</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-white/20 rounded-lg"><span className="material-symbols-outlined text-white">group_add</span></div>
+                            <div className="p-2 bg-white/20 rounded-lg"><span className="material-symbols-outlined text-white" aria-hidden="true">group_add</span></div>
                             <span className="font-bold text-lg">Connect with Peers</span>
                         </div>
                     </div>
@@ -171,7 +171,7 @@ const RegisterPage = () => {
                 {/* Top Navigation / Mobile Header */}
                 <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-gray-800 lg:border-none">
                     <div className="lg:hidden flex items-center gap-2 text-primary">
-                        <span className="material-symbols-outlined text-3xl">diversity_3</span>
+                        <span className="material-symbols-outlined text-3xl" aria-hidden="true">diversity_3</span>
                         <span className="text-xl font-bold">De-Novo</span>
                     </div>
                     <div className="hidden lg:block"></div> {/* Spacer for desktop layout balance if needed */}
@@ -199,7 +199,7 @@ const RegisterPage = () => {
                                         </h2>
                                     </div>
                                     <div className="hidden md:block text-right">
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                        <p className="text-xs text-slate-500 dark:text-slate-500 font-medium">
                                             {step < 3 && <>Next: <span className="text-slate-900 dark:text-white font-bold">
                                                 {step === 1 && 'Disability Needs'}
                                                 {step === 2 && 'Create Password'}
@@ -216,9 +216,9 @@ const RegisterPage = () => {
 
                         {/* Error Display */}
                         {displayError && (
-                            <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl">
+                            <div id="register-error" className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl" aria-live="polite">
                                 <div className="flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-red-500 text-lg">error</span>
+                                    <span className="material-symbols-outlined text-red-500 text-lg" aria-hidden="true">error</span>
                                     <p className="text-sm text-red-600 dark:text-red-400 font-medium">{displayError}</p>
                                 </div>
                             </div>
@@ -242,9 +242,11 @@ const RegisterPage = () => {
                                             placeholder="Your full name"
                                             value={formData.name}
                                             onChange={handleInputChange}
+                                            aria-invalid={!!displayError}
+                                            aria-describedby={displayError ? "register-error" : undefined}
                                         />
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">person</span>
+                                            <span className="material-symbols-outlined text-slate-500 text-lg" aria-hidden="true">person</span>
                                         </div>
                                     </div>
                                 </div>
@@ -260,9 +262,11 @@ const RegisterPage = () => {
                                             placeholder="name@company.com"
                                             value={formData.email}
                                             onChange={handleInputChange}
+                                            aria-invalid={!!displayError}
+                                            aria-describedby={displayError ? "register-error" : undefined}
                                         />
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">mail</span>
+                                            <span className="material-symbols-outlined text-slate-500 text-lg" aria-hidden="true">mail</span>
                                         </div>
                                     </div>
                                 </div>
@@ -277,9 +281,11 @@ const RegisterPage = () => {
                                             placeholder="@username"
                                             value={formData.username}
                                             onChange={handleInputChange}
+                                            aria-invalid={!!displayError}
+                                            aria-describedby={displayError ? "register-error" : undefined}
                                         />
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">alternate_email</span>
+                                            <span className="material-symbols-outlined text-slate-500 text-lg" aria-hidden="true">alternate_email</span>
                                         </div>
                                     </div>
                                 </div>
@@ -314,17 +320,23 @@ const RegisterPage = () => {
                                                     ? 'border-primary bg-primary/5 dark:bg-primary/10'
                                                     : 'border-slate-100 dark:border-slate-700 hover:border-primary/40 hover:bg-slate-50 dark:hover:bg-slate-800/50 bg-white dark:bg-slate-800'
                                                 }`}>
-                                                <div className={`p-2 rounded-lg shrink-0 ${formData.disability_type.includes(option.id) ? 'bg-white dark:bg-white/10 text-primary' : `bg-${option.color}-50 dark:bg-${option.color}-900/20 text-${option.color}-600 dark:text-${option.color}-400`
+                                                <div className={`p-2 rounded-lg shrink-0 ${formData.disability_type.includes(option.id) ? 'bg-white dark:bg-white/10 text-primary' : 
+                                                        ({
+                                                            blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+                                                            purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+                                                            orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
+                                                            emerald: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+                                                        })[option.color]
                                                     }`}>
-                                                    <span className="material-symbols-outlined text-2xl">{option.icon}</span>
+                                                    <span className="material-symbols-outlined text-2xl" aria-hidden="true">{option.icon}</span>
                                                 </div>
                                                 <div className="flex-1">
                                                     <h3 className="text-base font-bold text-slate-900 dark:text-white">{option.title}</h3>
-                                                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed line-clamp-1 sm:line-clamp-none">{option.desc}</p>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-500 font-medium leading-relaxed line-clamp-1 sm:line-clamp-none">{option.desc}</p>
                                                 </div>
                                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ${formData.disability_type.includes(option.id) ? 'border-primary bg-primary text-white' : 'border-slate-300 dark:border-slate-600'
                                                     }`}>
-                                                    {formData.disability_type.includes(option.id) && <span className="material-symbols-outlined text-[12px] font-bold">check</span>}
+                                                    {formData.disability_type.includes(option.id) && <span className="material-symbols-outlined text-[12px] font-bold" aria-hidden="true">check</span>}
                                                 </div>
                                             </div>
                                         </label>
@@ -351,9 +363,11 @@ const RegisterPage = () => {
                                             placeholder="At least 8 characters"
                                             value={formData.password}
                                             onChange={handleInputChange}
+                                            aria-invalid={!!displayError}
+                                            aria-describedby={displayError ? "register-error" : undefined}
                                         />
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">lock</span>
+                                            <span className="material-symbols-outlined text-slate-500 text-lg" aria-hidden="true">lock</span>
                                         </div>
                                     </div>
                                 </div>
@@ -369,9 +383,11 @@ const RegisterPage = () => {
                                             placeholder="Confirm your password"
                                             value={formData.password_confirm}
                                             onChange={handleInputChange}
+                                            aria-invalid={!!displayError}
+                                            aria-describedby={displayError ? "register-error" : undefined}
                                         />
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">lock</span>
+                                            <span className="material-symbols-outlined text-slate-500 text-lg" aria-hidden="true">lock</span>
                                         </div>
                                     </div>
                                 </div>
@@ -383,9 +399,9 @@ const RegisterPage = () => {
                             {step > 1 && (
                                 <button 
                                     onClick={handleBack}
-                                    className="w-full md:w-auto px-6 h-12 rounded-xl font-bold text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors flex items-center justify-center gap-2"
+                                    className="w-full md:w-auto px-6 h-12 rounded-xl font-bold text-sm text-slate-500 hover:text-slate-800 dark:text-slate-500 dark:hover:text-white transition-colors flex items-center justify-center gap-2"
                                 >
-                                    <span className="material-symbols-outlined text-lg">arrow_back</span>
+                                    <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span>
                                     Back
                                 </button>
                             )}
@@ -395,7 +411,7 @@ const RegisterPage = () => {
                                     className="w-full md:w-auto md:ml-auto px-8 h-12 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-base shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 focus:ring-4 focus:ring-primary/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                                 >
                                     <span>Continue</span>
-                                    <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                                    <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
                                 </button>
                             ) : (
                                 <button 
@@ -404,7 +420,7 @@ const RegisterPage = () => {
                                     className="w-full md:w-auto md:ml-auto px-8 h-12 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-base shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 focus:ring-4 focus:ring-primary/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <span>{isSubmitting ? 'Creating Account...' : 'Create Account'}</span>
-                                    {!isSubmitting && <span className="material-symbols-outlined text-lg">check</span>}
+                                    {!isSubmitting && <span className="material-symbols-outlined text-lg" aria-hidden="true">check</span>}
                                 </button>
                             )}
                         </div>
